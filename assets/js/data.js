@@ -3,80 +3,68 @@
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
-   Palette — the resistor colour code, plus solder-mask green and copper.
-   Every pair below is checked against WCAG AA at run time.
+   Four hues, one per discipline. Colour is an index, not decoration —
+   cyan is hardware, violet is firmware, magenta is sensing, amber is
+   software, everywhere on the page. Values live in style.css.
    --------------------------------------------------------------------- */
-const PAL = {
-  black  :['#212121','#FFFFFF'],   // 0
-  brown  :['#7B4A2D','#FFFFFF'],   // 1
-  red    :['#C62828','#FFFFFF'],   // 2
-  orange :['#C2570D','#FFFFFF'],   // 3
-  gold   :['#F2C230','#231A05'],   // 4 (yellow band)
-  green  :['#2E7D32','#FFFFFF'],   // 5 — solder mask
-  blue   :['#1565C0','#FFFFFF'],   // 6
-  violet :['#6A3FB5','#FFFFFF'],   // 7
-  slate  :['#455A64','#FFFFFF'],   // 8 (grey band)
-  cyan   :['#26C6DA','#0B2A2F'],   // trace on a scope
-  teal   :['#0E7A63','#FFFFFF'],
-  magenta:['#AD1457','#FFFFFF']
-};
+const HUE = { hw:'var(--c1)', fw:'var(--c2)', sn:'var(--c3)', sw:'var(--c4)' };
 
 const INTERESTS = [
-  { i:'board', c:'green',  t:'Board design',      d:'Schematic to fabricated PCB' },
-  { i:'chip',  c:'blue',   t:'Embedded firmware', d:'C on bare metal, tested first' },
-  { i:'wave',  c:'cyan',   t:'Sensing & RF',      d:'Making the physical world legible' },
-  { i:'arm',   c:'orange', t:'Robotics',          d:'Teleoperation and training data' },
-  { i:'car',   c:'red',    t:'Motorsport',        d:'Longhorn Baja electronics' },
-  { i:'brain', c:'violet', t:'Machine learning',  d:'Implemented, not imported' }
+  { i:'board', c:'hw', t:'Board design',      d:'Schematic to fabricated PCB' },
+  { i:'chip',  c:'fw', t:'Embedded firmware', d:'C on bare metal, tested first' },
+  { i:'wave',  c:'sn', t:'Sensing & RF',      d:'Making the physical world legible' },
+  { i:'arm',   c:'hw', t:'Robotics',          d:'Teleoperation and training data' },
+  { i:'car',   c:'sw', t:'Motorsport',        d:'Longhorn Baja electronics' },
+  { i:'brain', c:'fw', t:'Machine learning',  d:'Implemented, not imported' }
 ];
 
 /* `m` = terms matched against project stack/title/description so a badge
    can show you exactly where that skill was actually used. */
 const SKILLS = [
-  { t:'Hardware', g:'board', items:[
-    { n:'Altium Designer',   c:'orange', m:['Altium'] },
-    { n:'Schematic capture', c:'brown',  m:['Altium','schematic'] },
-    { n:'2-layer PCB',       c:'green',  m:['Altium','PCB','layout'] },
-    { n:'Footprint libraries', c:'gold', m:['SchLib','PcbLib'] },
-    { n:'DRC & CAM',         c:'blue',   m:['CAMtastic','DRC'] },
-    { n:'JLCPCB fabrication',c:'red',    m:['Altium','fabrication'] },
-    { n:'Soldering & rework',c:'slate',  m:['Altium'] }
+  { t:'Hardware', g:'board', hue:'hw', items:[
+    { n:'Altium Designer',   m:['Altium'] },
+    { n:'Schematic capture', m:['Altium','schematic'] },
+    { n:'2-layer PCB',       m:['Altium','PCB','layout'] },
+    { n:'Footprint libraries', m:['SchLib','PcbLib'] },
+    { n:'DRC & CAM',         m:['CAMtastic','DRC'] },
+    { n:'JLCPCB fabrication',m:['Altium','fabrication'] },
+    { n:'Soldering & rework',m:['Altium'] }
   ]},
-  { t:'Firmware & embedded', g:'chip', items:[
-    { n:'Embedded C',        c:'blue',   m:['Embedded C','C/C++'] },
-    { n:'STM32 · Cortex-M0+',c:'cyan',   m:['STM32','STM32C011'] },
-    { n:'RP2040',            c:'magenta',m:['RP2040'] },
-    { n:'CAN bus',           c:'orange', m:['CAN'] },
-    { n:'MCP2515',           c:'slate',  m:['MCP2515'] },
-    { n:'SPI · I²C · UART',  c:'violet', m:['STM32C011','RP2040'] },
-    { n:'Interrupt design',  c:'black',  m:['STM32C011','RP2040'] },
-    { n:'Host-run unit tests',c:'green', m:['pytest','test suites','test floor'] }
+  { t:'Firmware & embedded', g:'chip', hue:'fw', items:[
+    { n:'Embedded C',        m:['Embedded C','C/C++'] },
+    { n:'STM32 · Cortex-M0+',m:['STM32','STM32C011'] },
+    { n:'RP2040',            m:['RP2040'] },
+    { n:'CAN bus',           m:['CAN'] },
+    { n:'MCP2515',           m:['MCP2515'] },
+    { n:'SPI · I²C · UART',  m:['STM32C011','RP2040'] },
+    { n:'Interrupt design',  m:['STM32C011','RP2040'] },
+    { n:'Host-run unit tests',m:['pytest','test suites','test floor'] }
   ]},
-  { t:'Sensing & instrumentation', g:'wave', items:[
-    { n:'Magnetic encoders', c:'teal',   m:['MT6701','encoder'] },
-    { n:'Hall-effect',       c:'green',  m:['Hall-effect'] },
-    { n:'6-axis IMU',        c:'blue',   m:['IMU'] },
-    { n:'Chipless RFID',     c:'violet', m:['RFID'] },
-    { n:'Resonant RLC',      c:'magenta',m:['RLC'] },
-    { n:'Strain & temperature',c:'red',  m:['strain','LPBF'] },
-    { n:'DAQ ~500 Hz',       c:'orange', m:['Hall-effect','RP2040'] },
-    { n:'Oscilloscope · DMM',c:'gold',   m:['Altium','RP2040'] }
+  { t:'Sensing & instrumentation', g:'wave', hue:'sn', items:[
+    { n:'Magnetic encoders', m:['MT6701','encoder'] },
+    { n:'Hall-effect',       m:['Hall-effect'] },
+    { n:'6-axis IMU',        m:['IMU'] },
+    { n:'Chipless RFID',     m:['RFID'] },
+    { n:'Resonant RLC',      m:['RLC'] },
+    { n:'Strain & temperature',m:['strain','LPBF'] },
+    { n:'DAQ ~500 Hz',       m:['Hall-effect','RP2040'] },
+    { n:'Oscilloscope · DMM',m:['Altium','RP2040'] }
   ]},
-  { t:'Software & tooling', g:'code', items:[
-    { n:'Python',            c:'blue',   m:['Python'] },
-    { n:'C / C++',           c:'slate',  m:['C/C++','Embedded C'] },
-    { n:'TypeScript',        c:'cyan',   m:['TypeScript'] },
-    { n:'ROS 2 Jazzy',       c:'black',  m:['ROS 2'] },
-    { n:'React',             c:'teal',   m:['React','Next.js'] },
-    { n:'FastAPI',           c:'green',  m:['FastAPI'] },
-    { n:'PyTorch',           c:'orange', m:['PyTorch'] },
-    { n:'pytest · mypy',     c:'violet', m:['pytest'] },
-    { n:'Git',               c:'red',    m:['Python','TypeScript','Embedded C','Altium','C/C++'] }
+  { t:'Software & tooling', g:'code', hue:'sw', items:[
+    { n:'Python',            m:['Python'] },
+    { n:'C / C++',           m:['C/C++','Embedded C'] },
+    { n:'TypeScript',        m:['TypeScript'] },
+    { n:'ROS 2 Jazzy',       m:['ROS 2'] },
+    { n:'React',             m:['React','Next.js'] },
+    { n:'FastAPI',           m:['FastAPI'] },
+    { n:'PyTorch',           m:['PyTorch'] },
+    { n:'pytest · mypy',     m:['pytest'] },
+    { n:'Git',               m:['Python','TypeScript','Embedded C','Altium','C/C++'] }
   ]}
 ];
 
 const EXPERIENCE = [
-  { role:'Software Engineering Intern', org:'GE Vernova', where:'Austin, TX', when:'2026', accent:'copper',
+  { role:'Software Engineering Intern', org:'GE Vernova', where:'Austin, TX', when:'2026', accent:'hw',
     bullets:[
       `Built a P&amp;ID and loop-diagram verification agent that cross-checks instrument tags against
        engineering drawing PDFs and returns a colour-coded review workbook.`,
@@ -86,7 +74,7 @@ const EXPERIENCE = [
       `Shipped an internal onboarding hub with an editable process flowchart and zero runtime dependencies.`
     ] },
   { role:'Undergraduate Researcher — Embedded Sensing', org:'UT Austin', where:'Austin, TX',
-    when:'2025 – present', accent:'moss',
+    when:'2025 – present', accent:'sn',
     bullets:[
       `DARPA-scale research on chipless RFID strain and temperature sensors embedded inside
        laser-powder-bed-fusion metal parts.`,
@@ -94,14 +82,14 @@ const EXPERIENCE = [
       `Supporting micro-cold-spray fabrication of sensors that can never be serviced once the part is printed.`
     ] },
   { role:'Electronics — Longhorn Baja Racing', org:'Baja SAE, UT Austin', where:'Austin, TX',
-    when:'2025 – present', accent:'amber',
+    when:'2025 – present', accent:'sw',
     bullets:[
       `Integrated 7+ vehicle sensors onto a Raspberry Pi Pico ECU — four Hall-effect wheel-speed
        channels, a six-axis IMU, brake pressure, and CVT temperature.`,
       `Live acquisition at ~500&nbsp;Hz per sensor with microSD telemetry logging past 8&nbsp;GB.`,
       `Held sampling latency under 5&nbsp;ms while staying robust to continuous vibration and EMI.`
     ] },
-  { role:'Electrical Engineer Service Intern', org:'BMW', where:'Houston, TX', when:'Jul 2024', accent:'clay',
+  { role:'Electrical Engineer Service Intern', org:'BMW', where:'Houston, TX', when:'Jul 2024', accent:'fw',
     bullets:[
       `Ran diagnostics on Digital Motor Electronics with OBD-II and BMW ISTA, troubleshooting 4+
        control-unit failures across 25+ vehicle models.`,
@@ -110,12 +98,12 @@ const EXPERIENCE = [
        electronics actually fail rather than how the textbook says they do.`
     ] },
   { role:'Job Shadowing — Electrical & Chemical', org:'Schlumberger', where:'Houston, TX',
-    when:'Jul – Aug 2024', accent:'slate',
+    when:'Jul – Aug 2024', accent:'sw',
     bullets:[
       `Fluid engineering for well-bore drilling at the world's largest drilling contractor by revenue.`,
       `Focused on distributed energy sources and the electrical pressure sensors used downhole.`
     ] },
-  { role:'Electrical Engineering Intern', org:'Baker Hughes', where:'Houston, TX', when:'Jun 2023', accent:'copper',
+  { role:'Electrical Engineering Intern', org:'Baker Hughes', where:'Houston, TX', when:'Jun 2023', accent:'hw',
     bullets:[
       `Worked with the Remote Operations Engineering team on hybrid electric drills.`,
       `Managed rotary steerable gear tests measuring torque under simulated downhole pressure to

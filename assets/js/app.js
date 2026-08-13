@@ -132,25 +132,34 @@
       pads = pads.filter(p => now - p.t < LIFE);
 
       const cs = getComputedStyle(document.documentElement);
-      const copper = cs.getPropertyValue('--copper-2').trim() || '#BE7146';
-      const paper  = cs.getPropertyValue('--paper').trim()   || '#F7F3EC';
+      const c1 = cs.getPropertyValue('--c1').trim() || '#22E0FF';
+      const c3 = cs.getPropertyValue('--c3').trim() || '#FF3D8B';
+      const bg = cs.getPropertyValue('--bg').trim() || '#06070F';
+      const glow = parseFloat(cs.getPropertyValue('--glow')) || 0;
 
       ctx.clearRect(0, 0, W, H);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2.2;
-      ctx.strokeStyle = copper;
-      segs.forEach(function (s) {
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      // The trace cools from cyan to magenta as it ages, like a discharging arc.
+      segs.forEach(function (s, i) {
         const k = 1 - (now - s.t) / LIFE;
-        ctx.globalAlpha = k * k * .5;
+        ctx.globalAlpha = k * k * (glow ? .85 : .45);
+        ctx.strokeStyle = i % 2 ? c3 : c1;
+        ctx.lineWidth = 1.6 + k * 1.4;
+        ctx.shadowColor = i % 2 ? c3 : c1;
+        ctx.shadowBlur = 14 * k * glow;
         ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y); ctx.stroke();
       });
+
       pads.forEach(function (p) {
         const k = 1 - (now - p.t) / LIFE;
-        ctx.globalAlpha = k * k * .55; ctx.fillStyle = copper;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 3.1, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = k * k; ctx.fillStyle = paper;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 1.15, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = k * k * (glow ? .9 : .5);
+        ctx.fillStyle = c1; ctx.shadowColor = c1; ctx.shadowBlur = 16 * k * glow;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.globalAlpha = k * k; ctx.fillStyle = bg;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2); ctx.fill();
       });
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
       if (segs.length || pads.length) requestAnimationFrame(tick); else running = false;
     }
   })();
@@ -162,8 +171,7 @@
     const ints = $('#interests');
     if (ints && typeof INTERESTS !== 'undefined') {
       ints.innerHTML = INTERESTS.map(function (x) {
-        const c = (PAL[x.c] || PAL.slate)[0];
-        return '<div class="int" style="--c:' + c + '" data-rv>' +
+        return '<div class="int" style="--c:' + (HUE[x.c] || HUE.hw) + '" data-rv>' +
           icon(x.i) + '<b>' + x.t + '</b><span>' + x.d + '</span></div>';
       }).join('');
     }
@@ -171,15 +179,24 @@
     const sk = $('#skills');
     if (sk && typeof SKILLS !== 'undefined') {
       sk.innerHTML = SKILLS.map(function (s) {
-        return '<div class="sk" data-rv><h4>' + icon(s.g) + s.t + '</h4><div class="badges">' +
+        const c = HUE[s.hue] || HUE.hw;
+        return '<div class="sk" style="--c:' + c + '" data-rv><h4>' + icon(s.g) + s.t + '</h4>' +
+          '<div class="badges">' +
           s.items.map(function (i) {
-            const p = PAL[i.c] || PAL.slate;
-            return '<button class="badge" type="button" style="--bg:' + p[0] + ';--fg:' + p[1] + '"' +
+            return '<button class="badge" type="button"' +
               ' data-skill="' + i.n + '" data-match="' + (i.m || [i.n]).join('|') + '">' +
               '<span class="badge-ic">' + icon(s.g) + '</span><span class="badge-t">' + i.n + '</span>' +
               '</button>';
           }).join('') + '</div></div>';
       }).join('');
+    }
+
+    /* marquee — the whole toolchain, looping */
+    const mq = $('#mq');
+    if (mq && typeof SKILLS !== 'undefined') {
+      const all = SKILLS.reduce((a, s) => a.concat(s.items.map(i => i.n)), []);
+      const run = '<span>' + all.join('</span><span>') + '</span>';
+      mq.innerHTML = run + run;          // duplicated so the -50% loop is seamless
     }
     const ed = $('#edu');
     if (ed && typeof EDUCATION !== 'undefined') {
@@ -197,8 +214,8 @@
     host.innerHTML = EXPERIENCE.map(function (e, i) {
       const side = i % 2 === 0 ? 'left' : 'right';
       return '<div class="tl-item ' + side + '" data-rv>' +
-        '<span class="tl-via" aria-hidden="true"></span>' +
-        '<article class="tl-card" style="--acc:var(--acc-' + (e.accent || 'copper') + ')">' +
+        '<span class="tl-via" aria-hidden="true" style="--acc:' + (HUE[e.accent] || HUE.hw) + '"></span>' +
+        '<article class="tl-card" style="--acc:' + (HUE[e.accent] || HUE.hw) + '">' +
           '<h3 class="tl-role">' + e.role + '</h3>' +
           '<p class="tl-org">' + e.org + ' &middot; ' + e.where + '</p>' +
           '<p class="tl-when">' + e.when + '</p>' +
@@ -399,15 +416,45 @@
      ================================================================= */
   (function reveal() {
     const all = $$('[data-rv]');
-    const showAll = () => all.forEach(e => e.classList.add('in'));
+    const showAll = () => all.forEach(e => { e.style.transitionDelay = '0ms'; e.classList.add('in'); });
     if (REDUCED || !('IntersectionObserver' in window)) { showAll(); return; }
+
     const io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      // Stagger siblings that arrive together so grids cascade in.
+      const hit = es.filter(e => e.isIntersecting);
+      hit.forEach(function (e, i) {
+        e.target.style.transitionDelay = Math.min(i * 55, 330) + 'ms';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
       });
     }, { rootMargin: '0px 0px -6% 0px', threshold: .05 });
+
     all.forEach(e => io.observe(e));
     setTimeout(showAll, 2500);
+  })();
+
+  /* =================================================================
+     pointer-tracked tilt on project cards
+     ================================================================= */
+  (function tilt() {
+    if (REDUCED || !matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+    const MAX = 5;  // degrees — enough to read as depth, not enough to nauseate
+    $$('.card').forEach(function (card) {
+      let raf = null;
+      card.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          raf = null;
+          const r = card.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - .5;
+          const py = (e.clientY - r.top) / r.height - .5;
+          card.style.transform =
+            'perspective(900px) rotateY(' + (px * MAX * 2).toFixed(2) + 'deg) rotateX(' +
+            (-py * MAX * 2).toFixed(2) + 'deg) translateY(-3px)';
+        });
+      });
+      card.addEventListener('pointerleave', function () { card.style.transform = ''; });
+    });
   })();
 
 })();
