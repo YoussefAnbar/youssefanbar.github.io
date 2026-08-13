@@ -207,20 +207,58 @@ main,.navbar{ position:relative; z-index:1; }
   background:var(--paper); border:1px solid var(--rule); border-radius:20px;
   transition:border-color 220ms var(--ease), transform 220ms var(--ease);
 }
-@media (hover:hover){ .int:hover{ border-color:var(--copper); transform:translateY(-2px); } }
-.int svg{ width:28px; height:28px; color:var(--copper); margin:0 auto .6rem; display:block; }
+@media (hover:hover){ .int:hover{ border-color:var(--c,var(--copper)); transform:translateY(-2px); } }
+.int svg{ width:28px; height:28px; color:var(--c,var(--copper)); margin:0 auto .6rem; display:block; }
 .int b{ display:block; font-family:var(--body); font-weight:600; font-size:.95rem; line-height:1.3; }
 .int span{ display:block; font-size:.82rem; color:var(--ink-3); margin-top:.2rem; line-height:1.45; }
 
-/* skills */
-.skills{ display:grid; gap:1.5rem; width:100%; grid-template-columns:repeat(auto-fit,minmax(11rem,1fr)); }
-.sk h4{
-  font-family:var(--mono); font-size:.7rem; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--ink-3); margin:0 0 .7rem; padding-bottom:.5rem; border-bottom:1px solid var(--rule);
-  font-weight:500; text-align:center;
+/* skills — resistor-code badges */
+.skills-hint{
+  margin:-.5rem 0 0; font-family:var(--mono); font-size:.74rem; color:var(--ink-3); text-align:center;
 }
-.sk ul{ list-style:none; margin:0; padding:0; text-align:center; }
-.sk li{ font-family:var(--mono); font-size:.76rem; color:var(--ink-2); padding:.26rem 0; line-height:1.5; }
+.skills{ display:grid; gap:1.7rem; width:100%; }
+.sk h4{
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  font-family:var(--mono); font-size:.7rem; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 .85rem; padding-bottom:.55rem; border-bottom:1px solid var(--rule);
+  font-weight:500;
+}
+.sk h4 svg{ width:15px; height:15px; color:var(--copper); flex:none; }
+
+.badges{ display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; }
+.badge{
+  display:inline-flex; align-items:stretch; min-height:44px; padding:0; cursor:pointer;
+  border:0; border-radius:10px; overflow:hidden;
+  background:var(--bg); color:var(--fg);
+  font-family:var(--mono); font-size:.7rem; letter-spacing:.07em; text-transform:uppercase;
+  box-shadow:0 1px 0 rgba(0,0,0,.12);
+  transition:transform 180ms var(--ease), box-shadow 180ms var(--ease), filter 180ms var(--ease);
+}
+.badge-ic{ display:grid; place-items:center; width:34px; flex:none; background:rgba(0,0,0,.22); }
+.badge-ic svg{ width:15px; height:15px; }
+.badge-t{ display:flex; align-items:center; padding:0 .9rem; }
+@media (hover:hover){
+  .badge:hover{ transform:translateY(-2px); filter:saturate(1.15) brightness(1.06);
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.45); }
+}
+.badge:active{ transform:translateY(0); }
+.badge.on{ box-shadow:0 0 0 3px var(--paper-2), 0 0 0 5px var(--bg); }
+
+/* the cross-filter status bar */
+.filter-bar{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.85rem;
+  max-width:46rem; margin:1.6rem auto 0; padding:.8rem 1.15rem;
+  background:var(--paper-2); border:1px solid var(--copper); border-radius:18px;
+}
+.fb-text{ font-size:.94rem; color:var(--ink-2); }
+.fb-text b{ color:var(--copper); font-weight:600; }
+.fb-clear{
+  min-height:44px; padding:0 1.05rem; border-radius:12px; cursor:pointer;
+  background:transparent; border:1px solid var(--rule-2); color:var(--ink);
+  font-family:var(--mono); font-size:.72rem;
+  transition:border-color 200ms var(--ease), color 200ms var(--ease);
+}
+.fb-clear:hover{ border-color:var(--copper); color:var(--copper); }
 
 /* education */
 .edu{ list-style:none; margin:0; padding:0; width:100%; max-width:34rem; }
@@ -295,6 +333,8 @@ main,.navbar{ position:relative; z-index:1; }
   transition:border-color 240ms var(--ease), transform 240ms var(--ease), box-shadow 240ms var(--ease);
 }
 @media (hover:hover){ .card:hover{ border-color:var(--rule-2); transform:translateY(-3px); box-shadow:var(--shadow); } }
+.card.hit{ border-color:var(--copper); }
+.card[hidden],.pgroup[hidden]{ display:none; }
 .card-cover{ height:132px; background:var(--paper-3); border-bottom:1px solid var(--rule); }
 .card-cover svg{ width:100%; height:100%; display:block; }
 .card-body{ padding:1.15rem 1.3rem 1.3rem; display:flex; flex-direction:column; flex:1; }

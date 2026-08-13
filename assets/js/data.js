@@ -2,24 +2,77 @@
    CONTENT — numbers read from the repositories and résumé, not estimated.
    ===================================================================== */
 
+/* ---------------------------------------------------------------------
+   Palette — the resistor colour code, plus solder-mask green and copper.
+   Every pair below is checked against WCAG AA at run time.
+   --------------------------------------------------------------------- */
+const PAL = {
+  black  :['#212121','#FFFFFF'],   // 0
+  brown  :['#7B4A2D','#FFFFFF'],   // 1
+  red    :['#C62828','#FFFFFF'],   // 2
+  orange :['#C2570D','#FFFFFF'],   // 3
+  gold   :['#F2C230','#231A05'],   // 4 (yellow band)
+  green  :['#2E7D32','#FFFFFF'],   // 5 — solder mask
+  blue   :['#1565C0','#FFFFFF'],   // 6
+  violet :['#6A3FB5','#FFFFFF'],   // 7
+  slate  :['#455A64','#FFFFFF'],   // 8 (grey band)
+  cyan   :['#26C6DA','#0B2A2F'],   // trace on a scope
+  teal   :['#0E7A63','#FFFFFF'],
+  magenta:['#AD1457','#FFFFFF']
+};
+
 const INTERESTS = [
-  { i:'board',  t:'Board design',        d:'Schematic to fabricated PCB' },
-  { i:'chip',   t:'Embedded firmware',   d:'C on bare metal, tested first' },
-  { i:'wave',   t:'Sensing & RF',        d:'Making the physical world legible' },
-  { i:'arm',    t:'Robotics',            d:'Teleoperation and training data' },
-  { i:'car',    t:'Motorsport',          d:'Longhorn Baja electronics' },
-  { i:'brain',  t:'Machine learning',    d:'Implemented, not imported' }
+  { i:'board', c:'green',  t:'Board design',      d:'Schematic to fabricated PCB' },
+  { i:'chip',  c:'blue',   t:'Embedded firmware', d:'C on bare metal, tested first' },
+  { i:'wave',  c:'cyan',   t:'Sensing & RF',      d:'Making the physical world legible' },
+  { i:'arm',   c:'orange', t:'Robotics',          d:'Teleoperation and training data' },
+  { i:'car',   c:'red',    t:'Motorsport',        d:'Longhorn Baja electronics' },
+  { i:'brain', c:'violet', t:'Machine learning',  d:'Implemented, not imported' }
 ];
 
+/* `m` = terms matched against project stack/title/description so a badge
+   can show you exactly where that skill was actually used. */
 const SKILLS = [
-  { t:'Hardware', items:['Altium Designer','Schematic capture','2-layer PCB layout','Multi-sheet design',
-      'Custom SchLib / PcbLib','DRC & CAM verification','BOM generation','JLCPCB fabrication','Soldering & rework'] },
-  { t:'Firmware & embedded', items:['Embedded C','STM32 · Cortex-M0+','RP2040','CAN bus · MCP2515',
-      'SPI · I²C · UART','Interrupt-driven design','Host-compiled unit tests','PlatformIO'] },
-  { t:'Sensing & instrumentation', items:['Magnetic rotary encoders','Hall-effect sensors','6-axis IMU',
-      'Resonant RLC · chipless RFID','Strain & temperature','DAQ ~500 Hz','Oscilloscope · DMM','OBD-II · BMW ISTA'] },
-  { t:'Software & tooling', items:['Python','C / C++','TypeScript','ROS 2 Jazzy','React','FastAPI',
-      'PyTorch · scikit-learn','Git','pytest · mypy --strict','Ansys'] }
+  { t:'Hardware', g:'board', items:[
+    { n:'Altium Designer',   c:'orange', m:['Altium'] },
+    { n:'Schematic capture', c:'brown',  m:['Altium','schematic'] },
+    { n:'2-layer PCB',       c:'green',  m:['Altium','PCB','layout'] },
+    { n:'Footprint libraries', c:'gold', m:['SchLib','PcbLib'] },
+    { n:'DRC & CAM',         c:'blue',   m:['CAMtastic','DRC'] },
+    { n:'JLCPCB fabrication',c:'red',    m:['Altium','fabrication'] },
+    { n:'Soldering & rework',c:'slate',  m:['Altium'] }
+  ]},
+  { t:'Firmware & embedded', g:'chip', items:[
+    { n:'Embedded C',        c:'blue',   m:['Embedded C','C/C++'] },
+    { n:'STM32 · Cortex-M0+',c:'cyan',   m:['STM32'] },
+    { n:'RP2040',            c:'magenta',m:['RP2040'] },
+    { n:'CAN bus',           c:'orange', m:['CAN'] },
+    { n:'MCP2515',           c:'slate',  m:['MCP2515'] },
+    { n:'SPI · I²C · UART',  c:'violet', m:['STM32','RP2040'] },
+    { n:'Interrupt design',  c:'black',  m:['STM32','RP2040'] },
+    { n:'Host-run unit tests',c:'green', m:['pytest','test'] }
+  ]},
+  { t:'Sensing & instrumentation', g:'wave', items:[
+    { n:'Magnetic encoders', c:'teal',   m:['MT6701','encoder'] },
+    { n:'Hall-effect',       c:'green',  m:['Hall-effect'] },
+    { n:'6-axis IMU',        c:'blue',   m:['IMU'] },
+    { n:'Chipless RFID',     c:'violet', m:['RFID'] },
+    { n:'Resonant RLC',      c:'magenta',m:['RLC'] },
+    { n:'Strain & temperature',c:'red',  m:['strain','LPBF'] },
+    { n:'DAQ ~500 Hz',       c:'orange', m:['Hall-effect','RP2040'] },
+    { n:'Oscilloscope · DMM',c:'gold',   m:['Altium','RP2040'] }
+  ]},
+  { t:'Software & tooling', g:'code', items:[
+    { n:'Python',            c:'blue',   m:['Python'] },
+    { n:'C / C++',           c:'slate',  m:['C/C++','Embedded C'] },
+    { n:'TypeScript',        c:'cyan',   m:['TypeScript'] },
+    { n:'ROS 2 Jazzy',       c:'black',  m:['ROS 2'] },
+    { n:'React',             c:'teal',   m:['React','Next.js'] },
+    { n:'FastAPI',           c:'green',  m:['FastAPI'] },
+    { n:'PyTorch',           c:'orange', m:['PyTorch'] },
+    { n:'pytest · mypy',     c:'violet', m:['pytest'] },
+    { n:'Git',               c:'red',    m:['Python','TypeScript'] }
+  ]}
 ];
 
 const EXPERIENCE = [

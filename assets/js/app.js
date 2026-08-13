@@ -20,7 +20,8 @@
     wave: '<path d="M2 12c2.5 0 2.5-7 5-7s2.5 14 5 14 2.5-7 5-7 2.5 3 5 3"/>',
     arm:  '<path d="M4 21h6M7 21v-5l6-4 4-6"/><circle cx="7" cy="16" r="2"/><circle cx="13" cy="12" r="1.8"/><circle cx="17" cy="6" r="2.4"/>',
     car:  '<path d="M3 15h18M5 15l1.8-5A2 2 0 0 1 8.7 8.6h6.6a2 2 0 0 1 1.9 1.4L19 15v3.5h-3V17H8v1.5H5Z"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/>',
-    brain:'<circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M8 8l2.4 2.6M8 16l2.4-2.6M14 11l3-2.6M14 13l3 2.6"/>'
+    brain:'<circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M8 8l2.4 2.6M8 16l2.4-2.6M14 11l3-2.6M14 13l3 2.6"/>',
+    code: '<path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.5 4.5l-3 15"/>'
   };
   const icon = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || ICON.chip) + '</svg>';
@@ -160,14 +161,25 @@
   (function about() {
     const ints = $('#interests');
     if (ints && typeof INTERESTS !== 'undefined') {
-      ints.innerHTML = INTERESTS.map(x =>
-        '<div class="int" data-rv>' + icon(x.i) + '<b>' + x.t + '</b><span>' + x.d + '</span></div>').join('');
+      ints.innerHTML = INTERESTS.map(function (x) {
+        const c = (PAL[x.c] || PAL.slate)[0];
+        return '<div class="int" style="--c:' + c + '" data-rv>' +
+          icon(x.i) + '<b>' + x.t + '</b><span>' + x.d + '</span></div>';
+      }).join('');
     }
+
     const sk = $('#skills');
     if (sk && typeof SKILLS !== 'undefined') {
-      sk.innerHTML = SKILLS.map(s =>
-        '<div class="sk"><h4>' + s.t + '</h4><ul>' +
-        s.items.map(i => '<li>' + i + '</li>').join('') + '</ul></div>').join('');
+      sk.innerHTML = SKILLS.map(function (s) {
+        return '<div class="sk" data-rv><h4>' + icon(s.g) + s.t + '</h4><div class="badges">' +
+          s.items.map(function (i) {
+            const p = PAL[i.c] || PAL.slate;
+            return '<button class="badge" type="button" style="--bg:' + p[0] + ';--fg:' + p[1] + '"' +
+              ' data-skill="' + i.n + '" data-match="' + (i.m || [i.n]).join('|') + '">' +
+              '<span class="badge-ic">' + icon(s.g) + '</span><span class="badge-t">' + i.n + '</span>' +
+              '</button>';
+          }).join('') + '</div></div>';
+      }).join('');
     }
     const ed = $('#edu');
     if (ed && typeof EDUCATION !== 'undefined') {
@@ -218,7 +230,9 @@
         '<h3 class="pgroup-pill" data-rv>' + g.label + '</h3>' +
         '<p class="pgroup-note">' + g.note + '</p>' +
         '<div class="cards">' + items.map(p =>
-          '<article class="card" data-rv>' +
+          '<article class="card" data-rv data-hay="' +
+            (p.title + ' ' + p.stack + ' ' + p.d).replace(/<[^>]+>/g, ' ').replace(/"/g, '')
+              .toLowerCase() + '">' +
             '<div class="card-cover">' + cover(p.cover) + '</div>' +
             '<div class="card-body">' +
               '<div class="card-head"><h4 class="card-t">' + p.title + '</h4>' +
@@ -232,6 +246,77 @@
           '</article>').join('') + '</div>' +
       '</section>';
     }).join('');
+  })();
+
+  /* =================================================================
+     skill badge → project cross-filter
+     Clicking a skill answers the question a badge normally dodges:
+     "fine, but where did you actually use it?"
+     ================================================================= */
+  (function crossFilter() {
+    const bar = $('#filter-bar');
+    const badges = $$('.badge');
+    if (!bar || !badges.length) return;
+
+    const cards = $$('.card');
+    const groups = $$('.pgroup');
+    let active = null;
+
+    function clear() {
+      active = null;
+      badges.forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
+      cards.forEach(c => { c.hidden = false; c.classList.remove('hit'); });
+      groups.forEach(g => { g.hidden = false; });
+      bar.hidden = true;
+      bar.innerHTML = '';
+    }
+
+    function apply(btn) {
+      const terms = btn.dataset.match.toLowerCase().split('|').filter(Boolean);
+      const name = btn.dataset.skill;
+      let n = 0;
+
+      cards.forEach(function (c) {
+        const hay = c.dataset.hay || '';
+        const hit = terms.some(t => hay.indexOf(t) > -1);
+        c.hidden = !hit;
+        c.classList.toggle('hit', hit);
+        if (hit) n++;
+      });
+      // hide any group left with nothing in it
+      groups.forEach(function (g) {
+        g.hidden = !$$('.card', g).some(c => !c.hidden);
+      });
+
+      active = name;
+      badges.forEach(function (b) {
+        const on = b === btn;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+
+      bar.hidden = false;
+      bar.innerHTML =
+        '<span class="fb-text">' +
+          (n ? 'Showing <b>' + n + '</b> project' + (n === 1 ? '' : 's') + ' using <b>' + name + '</b>'
+             : 'No project on this page uses <b>' + name + '</b> directly — it shows up in coursework and bench work instead.') +
+        '</span><button class="fb-clear" type="button">Show everything</button>';
+      bar.querySelector('.fb-clear').addEventListener('click', function () {
+        clear();
+        $('#skills').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+      });
+    }
+
+    badges.forEach(function (b) {
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function () {
+        if (active === b.dataset.skill) { clear(); return; }
+        apply(b);
+        $('#projects').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+      });
+    });
+
+    addEventListener('keydown', e => { if (e.key === 'Escape' && active) clear(); });
   })();
 
   /* =================================================================
