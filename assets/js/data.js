@@ -44,13 +44,13 @@ const SKILLS = [
   ]},
   { t:'Firmware & embedded', g:'chip', items:[
     { n:'Embedded C',        c:'blue',   m:['Embedded C','C/C++'] },
-    { n:'STM32 · Cortex-M0+',c:'cyan',   m:['STM32'] },
+    { n:'STM32 · Cortex-M0+',c:'cyan',   m:['STM32','STM32C011'] },
     { n:'RP2040',            c:'magenta',m:['RP2040'] },
     { n:'CAN bus',           c:'orange', m:['CAN'] },
     { n:'MCP2515',           c:'slate',  m:['MCP2515'] },
-    { n:'SPI · I²C · UART',  c:'violet', m:['STM32','RP2040'] },
-    { n:'Interrupt design',  c:'black',  m:['STM32','RP2040'] },
-    { n:'Host-run unit tests',c:'green', m:['pytest','test'] }
+    { n:'SPI · I²C · UART',  c:'violet', m:['STM32C011','RP2040'] },
+    { n:'Interrupt design',  c:'black',  m:['STM32C011','RP2040'] },
+    { n:'Host-run unit tests',c:'green', m:['pytest','test suites','test floor'] }
   ]},
   { t:'Sensing & instrumentation', g:'wave', items:[
     { n:'Magnetic encoders', c:'teal',   m:['MT6701','encoder'] },
@@ -71,7 +71,7 @@ const SKILLS = [
     { n:'FastAPI',           c:'green',  m:['FastAPI'] },
     { n:'PyTorch',           c:'orange', m:['PyTorch'] },
     { n:'pytest · mypy',     c:'violet', m:['pytest'] },
-    { n:'Git',               c:'red',    m:['Python','TypeScript'] }
+    { n:'Git',               c:'red',    m:['Python','TypeScript','Embedded C','Altium','C/C++'] }
   ]}
 ];
 
@@ -144,7 +144,7 @@ const GROUPS = [
 
 const PROJECTS = [
   { g:'hardware', cover:'board', title:'Inhabit Joint Pod', when:'2026',
-    stack:'Altium · STM32C011 · Embedded C · MCP2515 CAN',
+    stack:'Altium · STM32C011 · Embedded C · MCP2515 CAN · MT6701 encoder',
     d:`A modular robot joint taken from a blank Altium sheet to a board I could hold — multi-sheet
     schematic, hand-routed two-layer layout, and a real JLCPCB fabrication order. Every way it can
     fail has its own bit in a status byte, because a sensor that can't see must say so.`,

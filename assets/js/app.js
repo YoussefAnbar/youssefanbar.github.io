@@ -231,8 +231,8 @@
         '<p class="pgroup-note">' + g.note + '</p>' +
         '<div class="cards">' + items.map(p =>
           '<article class="card" data-rv data-hay="' +
-            (p.title + ' ' + p.stack + ' ' + p.d).replace(/<[^>]+>/g, ' ').replace(/"/g, '')
-              .toLowerCase() + '">' +
+            (p.title + ' ' + p.stack + ' ' + p.d + ' ' + p.stats.map(s => s[0]).join(' '))
+              .replace(/<[^>]+>/g, ' ').replace(/"/g, '').toLowerCase() + '">' +
             '<div class="card-cover">' + cover(p.cover) + '</div>' +
             '<div class="card-body">' +
               '<div class="card-head"><h4 class="card-t">' + p.title + '</h4>' +
@@ -262,6 +262,17 @@
     const groups = $$('.pgroup');
     let active = null;
 
+    // Naive substring matching is wrong here: "CAN" hits "cannot", "C" hits
+    // everything. Match on word boundaries instead, treating + # / . as part
+    // of a token so "C/C++" and "ROS 2" behave.
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const rxCache = {};
+    function matches(hay, term) {
+      const rx = rxCache[term] ||
+        (rxCache[term] = new RegExp('(^|[^a-z0-9+#/.])' + esc(term) + '([^a-z0-9+#/.]|$)', 'i'));
+      return rx.test(hay);
+    }
+
     function clear() {
       active = null;
       badges.forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
@@ -278,7 +289,7 @@
 
       cards.forEach(function (c) {
         const hay = c.dataset.hay || '';
-        const hit = terms.some(t => hay.indexOf(t) > -1);
+        const hit = terms.some(t => matches(hay, t));
         c.hidden = !hit;
         c.classList.toggle('hit', hit);
         if (hit) n++;
