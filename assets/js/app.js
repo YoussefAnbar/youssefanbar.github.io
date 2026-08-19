@@ -21,7 +21,8 @@
     arm:  '<path d="M4 21h6M7 21v-5l6-4 4-6"/><circle cx="7" cy="16" r="2"/><circle cx="13" cy="12" r="1.8"/><circle cx="17" cy="6" r="2.4"/>',
     car:  '<path d="M3 15h18M5 15l1.8-5A2 2 0 0 1 8.7 8.6h6.6a2 2 0 0 1 1.9 1.4L19 15v3.5h-3V17H8v1.5H5Z"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/>',
     brain:'<circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M8 8l2.4 2.6M8 16l2.4-2.6M14 11l3-2.6M14 13l3 2.6"/>',
-    code: '<path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.5 4.5l-3 15"/>'
+    code: '<path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.5 4.5l-3 15"/>',
+    sat:  '<rect x="9.5" y="9.5" width="5" height="5" rx="1" transform="rotate(45 12 12)"/><path d="M6.5 6.5 3 10l3.5 3.5M17.5 10.5 21 14l-3.5 3.5M12 16v4M9.5 20h5"/>'
   };
   const icon = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || ICON.chip) + '</svg>';
@@ -56,6 +57,12 @@
           '<path d="M22 100l40-26 40 22 40-30 40 14 40-26 40 18" opacity=".55" stroke-width="2"/>',
     stack:'<rect x="60" y="86" width="180" height="26" rx="5"/><rect x="76" y="54" width="148" height="26" rx="5" opacity=".72"/>' +
           '<rect x="92" y="22" width="116" height="26" rx="5" opacity=".48"/>',
+    sat:  '<rect x="128" y="46" width="44" height="40" rx="5"/><path d="M128 56H86l-18-14 26-18 20 22M172 76h44l16 14-26 16-18-20"/>' +
+          '<path d="M150 46V22M138 22h24"/><circle cx="150" cy="16" r="6"/>' +
+          '<path d="M30 108q40-34 80 0t80 0" opacity=".45"/>',
+    thermal:'<rect x="24" y="34" width="60" height="64" rx="6"/><rect x="216" y="34" width="60" height="64" rx="6"/>' +
+          '<path d="M84 52h132M84 80h132"/><path d="M204 46l12 6-12 6M96 74l-12 6 12 6"/>' +
+          '<path d="M120 22q10 10 0 20t0 20M150 22q10 10 0 20t0 20M180 22q10 10 0 20t0 20" opacity=".5"/>',
     net:  '<circle cx="44" cy="40" r="8"/><circle cx="44" cy="92" r="8"/><circle cx="150" cy="26" r="8"/>' +
           '<circle cx="150" cy="66" r="8"/><circle cx="150" cy="106" r="8"/><circle cx="256" cy="66" r="8"/>' +
           '<path d="M52 40l90-12M52 40l90 26M52 40l90 62M52 92l90-62M52 92l90-24M52 92l90 12' +
@@ -66,29 +73,6 @@
       'fill="none" stroke="' + C + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
       (COVER[kind] || COVER.trace) + '</svg>';
   }
-
-  /* =================================================================
-     theme
-     ================================================================= */
-  (function theme() {
-    const btn = $('#theme'); if (!btn) return;
-    const meta = $('meta[name="theme-color"]');
-    const paint = () => {
-      const dark = document.documentElement.dataset.theme === 'dark';
-      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-      btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-      // These must track --bg in style.css, or the browser chrome ends up a
-      // different colour from the page sitting behind it.
-      if (meta) meta.setAttribute('content', dark ? '#06070F' : '#F6F7FC');
-    };
-    btn.addEventListener('click', function () {
-      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      try { localStorage.setItem('theme', next); } catch (e) {}
-      paint();
-    });
-    paint();
-  })();
 
   /* =================================================================
      copper routing that follows the cursor
@@ -137,10 +121,9 @@
       pads = pads.filter(p => now - p.t < LIFE);
 
       const cs = getComputedStyle(document.documentElement);
-      const c1 = cs.getPropertyValue('--c1').trim() || '#22E0FF';
-      const c3 = cs.getPropertyValue('--c3').trim() || '#FF3D8B';
-      const bg = cs.getPropertyValue('--bg').trim() || '#06070F';
-      const glow = parseFloat(cs.getPropertyValue('--glow')) || 0;
+      const c1 = cs.getPropertyValue('--c1').trim() || "#01798F";
+      const c3 = cs.getPropertyValue('--c2').trim() || '#6134D4';
+      const bg = cs.getPropertyValue('--bg').trim() || '#FAFAFC';
 
       ctx.clearRect(0, 0, W, H);
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -148,18 +131,18 @@
       // The trace cools from cyan to magenta as it ages, like a discharging arc.
       segs.forEach(function (s, i) {
         const k = 1 - (now - s.t) / LIFE;
-        ctx.globalAlpha = k * k * (glow ? .85 : .45);
+        ctx.globalAlpha = k * k * .30;
         ctx.strokeStyle = i % 2 ? c3 : c1;
         ctx.lineWidth = 1.6 + k * 1.4;
         ctx.shadowColor = i % 2 ? c3 : c1;
-        ctx.shadowBlur = 14 * k * glow;
+        ctx.shadowBlur = 0;
         ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y); ctx.stroke();
       });
 
       pads.forEach(function (p) {
         const k = 1 - (now - p.t) / LIFE;
-        ctx.globalAlpha = k * k * (glow ? .9 : .5);
-        ctx.fillStyle = c1; ctx.shadowColor = c1; ctx.shadowBlur = 16 * k * glow;
+        ctx.globalAlpha = k * k * .40;
+        ctx.fillStyle = c1; ctx.shadowBlur = 0;
         ctx.beginPath(); ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0; ctx.globalAlpha = k * k; ctx.fillStyle = bg;
         ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2); ctx.fill();
@@ -271,6 +254,62 @@
   })();
 
   /* =================================================================
+     awards
+     ================================================================= */
+  (function awards() {
+    const host = $('#awards-grid');
+    if (!host || typeof AWARDS === 'undefined') return;
+    host.innerHTML = AWARDS.map(function (a) {
+      return '<article class="award" style="--c:' + (HUE[a.accent] || HUE.hw) + '" data-rv>' +
+        '<span class="aw-place">' + a.place + '</span>' +
+        '<b class="aw-prize" data-count="' + a.prize + '">$' + a.prize.toLocaleString('en-US') + '</b>' +
+        '<p class="aw-name">' + a.name + '</p>' +
+        '<p class="aw-d">' + a.d + '</p>' +
+      '</article>';
+    }).join('');
+  })();
+
+  /* =================================================================
+     count-up on prize figures
+     ================================================================= */
+  (function countUp() {
+    const els = $$('[data-count]');
+    if (!els.length || REDUCED || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        const el = e.target, end = +el.dataset.count, t0 = performance.now(), D = 1200;
+        (function step(now) {
+          const k = Math.min(1, (now - t0) / D);
+          const eased = 1 - Math.pow(1 - k, 3);
+          el.textContent = '$' + Math.round(end * eased).toLocaleString('en-US');
+          if (k < 1) requestAnimationFrame(step);
+        })(t0);
+      });
+    }, { threshold: .5 });
+    els.forEach(e => io.observe(e));
+  })();
+
+  /* =================================================================
+     scroll progress
+     ================================================================= */
+  (function progress() {
+    const bar = $('#progress'); if (!bar) return;
+    let queued = false;
+    const paint = function () {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, scrollY / max) : 0) + ')';
+    };
+    addEventListener('scroll', function () {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () { queued = false; paint(); });
+    }, { passive: true });
+    paint();
+  })();
+
+  /* =================================================================
      skill badge → project cross-filter
      Clicking a skill answers the question a badge normally dodges:
      "fine, but where did you actually use it?"
@@ -332,7 +371,7 @@
       bar.innerHTML =
         '<span class="fb-text">' +
           (n ? 'Showing <b>' + n + '</b> project' + (n === 1 ? '' : 's') + ' using <b>' + name + '</b>'
-             : 'No project on this page uses <b>' + name + '</b> directly — it shows up in coursework and bench work instead.') +
+             : '<b>' + name + '</b> doesn’t appear in a project card — it comes from the roles in Experience above.') +
         '</span><button class="fb-clear" type="button">Show everything</button>';
       bar.querySelector('.fb-clear').addEventListener('click', function () {
         clear();
