@@ -1,6 +1,6 @@
 /* =====================================================================
    CONTENT — sourced from the repositories and the current résumé.
-   Numbers are read, not estimated.
+   Numbers are read, not estimated. Audited against the repos 19 Aug 2026.
    ===================================================================== */
 
 /* Four hues, one per discipline. Colour is an index, not decoration. */
@@ -188,13 +188,13 @@ const PROJECTS = [
   { g:'systems', cover:'flow', title:'Inhabit Data Pipeline', when:'2026',
     stack:'Python · ROS 2 Jazzy · pytest · parquet',
     d:'Turns CAN frames into training data that’s allowed to be trusted. Episodes drifting outside the jitter budget are quarantined with an exact reason — not averaged in. Bad data costs you the model and the month you spend not understanding why.',
-    stats:[['commits','350'],['merged PRs','285'],['test floor','6 000']],
+    stats:[['commits','349'],['merged PRs','274'],['test floor','6 000']],
     links:[['Inhabit-Software','https://github.com/YoussefAnbar/Inhabit-Software','private']] },
 
   { g:'systems', cover:'net', title:'Teleoperation Console', when:'2026',
     stack:'TypeScript · Vite · WebSockets · CCD / DLS IK',
-    d:'Drag an arm in a browser and a simulated robot follows at 100&nbsp;Hz. I ported CPython’s Mersenne Twister to TypeScript and checked it draw for draw to fifteen decimals — an embarrassingly long weekend, but the demo and the bench are provably the same system.',
-    stats:[['loop','100 Hz'],['parity','15 decimals'],['commits','51']],
+    d:'Drag an arm in a browser and a simulated robot follows at 100&nbsp;Hz. I ported CPython’s Mersenne Twister to TypeScript — the <code>init_by_array</code> seeding path it uses for integer seeds, the 53-bit double built from two words rather than one, the rejection loop inside <code>_randbelow</code> — so the demo and the bench draw the same noise from the same seed. An embarrassingly long weekend, and I still owe it a committed parity fixture.',
+    stats:[['loop','100 Hz'],['RNG','CPython-faithful'],['commits','51']],
     links:[['Inhabit_UI','https://github.com/YoussefAnbar/Inhabit_UI','private']] },
 
   { g:'wins', cover:'thermal', title:'Datacenter Thermal Twin', when:'Yconic × NVIDIA · 2nd, $4,000',
@@ -229,19 +229,19 @@ const PROJECTS = [
 
   { g:'craft', cover:'chart', title:'Finabulary', when:'2026',
     stack:'React · Vite · Expo · Swift · Supabase',
-    d:'A financial-literacy app, built to find out what shipping actually costs. The answer is that most of it isn’t engineering — accessibility audits, privacy labels, review notes, and a full rebrand in the final week when the name didn’t clear.',
+    d:'A financial-literacy app, built to find out what shipping actually costs. The answer is that most of it isn’t engineering — accessibility audits, privacy labels, review notes, a row-level-security policy that turned out to be readable with the public key, and a full rebrand in the final week when the name didn’t clear.',
     stats:[['clients','3'],['commits','55'],['status','deployed']],
     links:[['Live site','https://signalwise-one.vercel.app'],['signalwise','https://github.com/YoussefAnbar/signalwise','private']] },
 
   { g:'craft', cover:'stack', title:'Virtual Wardrobe Platform', when:'2026',
     stack:'Next.js · TypeScript · FastAPI · monorepo',
-    d:'Mostly an exercise in saying no to the interesting parts first. I deferred AI processing, scraping, auth, payments, and 3D physics until the boring core loop worked. Shipping the interesting part first is how projects die at eighty percent.',
-    stats:[['packages','7'],['deferred','5, on purpose']],
+    d:'Mostly an exercise in saying no to the interesting parts first. I deferred AI processing, scraping, auth, payments, and 3D physics until the boring core loop worked — then broke my own rule thirty-four minutes after finishing phase three, on a branch that never merged. Shipping the interesting part first is how projects die at eighty percent.',
+    stats:[['packages','2'],['deferred','5, on purpose']],
     links:[['tryon-shopping-webapp','https://github.com/YoussefAnbar/tryon-shopping-webapp','private']] },
 
   { g:'roots', cover:'net', title:'Foundations', when:'2024 – 2025',
     stack:'Python · PyTorch · scikit-learn · LeRobot',
-    d:'A hundred and twenty-three commits of implementing things instead of importing them. Knowing what a seeded random draw actually <em>is</em> is what let me port CPython’s Mersenne Twister two years later.',
+    d:'A hundred and twenty-three commits of implementing things instead of importing them. My A* explored 1&nbsp;677 nodes where my Dijkstra explored 4&nbsp;944 on the same map — a number I trust because both were mine. Knowing what a seeded random draw actually <em>is</em> is what let me port CPython’s Mersenne Twister two years later.',
     stats:[['commits','123'],['notebooks','30+']],
     links:[['AI_Portfolio','https://github.com/YoussefAnbar/AI_Portfolio'],['vhs-intro-ai','https://github.com/YoussefAnbar/vhs-intro-ai','private']] }
 ];
@@ -258,9 +258,9 @@ const BYTES = [
   { hex:'02', name:'node_id', type:'u8',
     d:'Which physical pod sent this. It’s also folded into the arbitration ID, so the bus arbitrates by node priority for free — a hardware property earned by a numbering decision rather than by code.' },
   { hex:'01', name:'chain_index', type:'u8',
-    d:'Position in the kinematic chain, kept separate from node_id on purpose. This is what makes auto-enumeration possible: the base controller works out module order to the end-effector instead of being told, so a failed joint can be swapped without renumbering the arm.' },
+    d:'Position in the kinematic chain, kept separate from node_id on purpose. This is what makes auto-enumeration possible: the base controller works out module order to the end-effector instead of being told, so a failed joint can be swapped without renumbering the arm. It once shipped stuck at zero on every pod, because the enumeration state machine was merged into a file nothing called.' },
   { hex:'00', name:'status_flags', type:'u8 · bitfield',
     d:'Six named failure modes, one bit each: ADC fault, SPI fault, CAN fault, magnet out of bounds, not enumerated, calibration invalid. The physical form of the rule I keep coming back to — a subsystem that can’t do its job has to say so.' },
   { hex:'7B', name:'xor checksum', type:'u8',
-    d:'XOR across the preceding seven bytes. Cheap enough to compute inside an interrupt, enough to catch the single-bit corruption a short bus actually produces. The host records whether it matched, so a corrupted frame becomes a recorded fact instead of a silent one.' }
+    d:'XOR across the preceding seven bytes. Cheap enough to compute inside an interrupt, enough to catch the single-bit corruption a short bus actually produces. Two flipped bits can cancel, which is written down as a test rather than left for anyone to assume otherwise. The host records whether it matched, so a corrupted frame becomes a recorded fact instead of a silent one.' }
 ];
