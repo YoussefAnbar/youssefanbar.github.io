@@ -742,6 +742,113 @@ const STORIES = {
   },
 
   /* ---------------------------------------------------------------
+     Written from the team repository, Datlightning/MomentumBuildathon.
+     --------------------------------------------------------------- */
+  'escalation-sentiment-dashboard': {
+    status: 'ready',
+    lede: `Retail floor de-escalation. An ESP32 with a MAX4466 microphone streams audio over I2S to a
+           Flask server, which transcribes it, scores the sentiment, and shows a manager which parts of
+           a store are escalating. Built in six hours at the Momentum Buildathon — Yconic x NVIDIA,
+           11 April 2026 — with two teammates; second place, $4,000. Every model runs on the machine it
+           is deployed on, and that is the only part of the privacy story that is load-bearing.`,
+    sections: [
+      { h: 'What it is trying to make visible',
+        p: `A queue that is quietly going wrong does not page anyone. The pitch was that <b>lane 4 has
+            been hostile for six minutes</b> is invisible until the queue abandons, and by then the
+            only record of it is a till that stopped ringing. The dashboard's job is to put a number
+            and a location on that while there is still time to send someone over.` },
+      { h: 'Nothing leaves the machine',
+        p: `The inference stack is entirely local, and that was chosen rather than fallen into:`,
+        list: [
+          'Speech-to-text is <code>faster-whisper</code> — a <code>WhisperModel</code>, default <code>base</code>, running <code>cpu</code>/<code>int8</code>',
+          'Sentiment is a local Hugging Face transformer, <code>cardiffnlp/twitter-roberta-base-sentiment-latest</code>, scored as <code>p_pos - p_neg</code> and mapped to −1..+1',
+          'VADER is the fallback backend',
+          'Topics come from a regex lexicon: <code>coupon</code>, <code>wait_time</code>, <code>escalation</code>, <code>payment</code>, <code>price_match</code>, <code>returns</code>',
+          'The technical spec lists Google Cloud Speech-to-Text and Natural Language as an option. It is marked TODO and was never implemented.'
+        ],
+        quote: `Store audio never leaves the machine — not because a policy says so, but because there
+                is no code path that sends it anywhere.` },
+      { h: 'The privacy control is a geofence',
+        p: `<code>app/services/zone_engine.py</code> types every zone as either <code>customer</code>
+            or <code>private</code>, and <code>recording_allowed(zone)</code> returns true only for
+            customer zones. <code>config/zones.json</code> marks the stockroom, the breakroom and the
+            manager office <code>private</code> — the demo store is a simulated Walmart Supercenter
+            #4218 in Houston. When a device sitting in a private zone hits
+            <code>POST /escalation/trigger</code>, <code>app/routes/api.py</code> answers HTTP 403 with
+            <code>"reason": "private_zone"</code> and the message
+            <code>Recording disabled in {zone} — privacy mode active</code>.` },
+      { h: 'And the refusals are counted',
+        p: `Every block is written to a <code>privacy_blocks</code> table in SQLite and counted in
+            <code>/api/analytics/summary</code>. A refusal is a measured quantity rather than a silent
+            drop — which is the same instinct as a status byte that has to report its own faults. From
+            the outside, a system that quietly declines to act is indistinguishable from one that was
+            never asked.`,
+        quote: `A control you cannot count is a control nobody can check.` },
+      { h: 'Presence-triggered, not sentiment-triggered',
+        p: `<code>scripts/escalation_monitor.py</code> is webcam face detection — OpenCV YuNet with
+            Haar cascades — that sends <code>START_RECORDING</code> and <code>STOP_RECORDING</code> to
+            the ESP32 over a WebSocket. The microphone opens because someone is standing there, not
+            because something has already gone wrong. Sentiment is scored on what was captured; it does
+            not decide what gets captured.` },
+      { h: 'What I wrote',
+        list: [
+          '<code>app/services/zone_engine.py</code> (+54) and <code>config/zones.json</code> (+79) — the zone types and the recording gate',
+          '<code>app/models.py</code> (+135), including the <code>privacy_blocks</code> table',
+          '<code>static/js/app.js</code> (+400) and <code>templates/dashboard.html</code> (+133) — the dashboard itself',
+          '<code>scripts/escalation_monitor.py</code> (+265, then +112)',
+          '<code>app/services/device_sim.py</code> (+97)',
+          'the merge of the ESP32 branch into the Flask app'
+        ] },
+      { h: 'The stack',
+        p: `Python 3.11, Flask 3 and Jinja2, Tailwind over the CDN, Chart.js, SQLite, and
+            <code>flask-sock</code> for WebSocket ingest. The ESP32 firmware is C++ under PlatformIO.` },
+      { h: 'What is not real',
+        p: `Six hours buys a demo, and the honest version of the demo says which parts are furniture:`,
+        list: [
+          '<b>The dashboard data is simulated.</b> <code>device_sim.py</code> defines four fake workers, and <code>api.py</code> picks escalation summaries at random from a hard-coded list with a random confidence score attached.',
+          '<b>There is no redaction.</b> The database field is literally named <code>transcript_redacted</code> and it stores the raw transcript. Naming a field after work you did not do is worse than leaving the field out — anyone reading the schema would believe it.',
+          '<b>Retention is a mock setting.</b> <code>retention_days_transcript: 30</code> exists and no job enforces it.',
+          'All of my work is on the <code>dashboard-mvp</code> branch and was never merged to <code>main</code>. A visitor to the default branch sees none of it.',
+          'There is no README on the repository at all.'
+        ] }
+    ],
+    decisions: [
+      { d: 'Run every model locally instead of calling a hosted API',
+        why: `Cloud speech and sentiment would have been quicker to wire up and more accurate, and the
+              spec had them written down as an option. <code>faster-whisper</code> on int8 CPU and a
+              RoBERTa sentiment head are worse on both counts — but they move "privacy-first" from a
+              claim about intent to a claim about architecture, which is the only kind worth making
+              about a microphone in a shop.` },
+      { d: 'Attach the permission to the zone, not to the device',
+        why: `<code>recording_allowed()</code> takes a zone, so a device carried into the stockroom
+              stops being allowed to record without anyone remembering to change a setting. Putting the
+              flag on the device would have made the safe state depend on somebody updating it.` },
+      { d: 'Answer 403 and record it, rather than dropping the request',
+        why: `A silent drop and a healthy system produce identical data. A 403 carrying
+              <code>"reason": "private_zone"</code>, a row in <code>privacy_blocks</code> and a count
+              in the analytics summary means the privacy mode can be shown to have fired — which is
+              what anyone should want before believing it did.` }
+    ],
+    journal: [
+      { when: '11 April 2026, 13:11', p: `First commit. The whole repository is 14 commits between
+              13:11 and 18:26 — six hours, three people: Vihas (7 commits), me (4, +1,601/−1,042) and
+              sreekant gardas (3). My commits here are attributed to my own email, which is not true of
+              every team repository I have worked in.` },
+      { when: 'Commit bb48e4a', p: `"Add full dashboard MVP: GPS zones, privacy mode, escalation
+              alerts, analytics" — the zone engine, the zone config, the 403 path and the
+              <code>privacy_blocks</code> table all arrive in one commit. At that pace the privacy
+              control and the feature it constrains get written together or not at all.` },
+      { when: 'What the deadline bought and what it cost', p: `Local inference was decided early and
+              held, so the strongest claim in the project is structurally true rather than asserted.
+              Everything downstream of the demo — real device data, redaction, retention enforcement —
+              is scaffolding, and the branch it all lives on never reached <code>main</code>.` },
+      { when: 'What I would fix first', p: `Implement <code>transcript_redacted</code> or rename the
+              column. A schema that describes work nobody did is a quieter version of exactly the
+              problem this dashboard was built to catch.` }
+    ]
+  },
+
+  /* ---------------------------------------------------------------
      Everything below is scaffolding — the page renders the project
      overview and an honest "in progress" note until it is written.
      These have no development journal to write from yet.
@@ -750,7 +857,6 @@ const STORIES = {
   'tinycore-industries-micro-drone-hat':        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },
-  'escalation-sentiment-dashboard':             { status: 'draft' },
   'lidar-smart-bin':                            { status: 'draft' },
   'ai-cross-document-verification':             { status: 'draft' },
   'design-review-and-benchmarking':             { status: 'draft' }
