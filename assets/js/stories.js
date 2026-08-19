@@ -857,7 +857,7 @@ const STORIES = {
   'tinycore-industries-micro-drone-hat':        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },
-  'lidar-smart-bin':                            { status: 'draft' },
+  'ultrasonic-smart-bin':                       { status: 'draft' },
   'ai-cross-document-verification':             { status: 'draft' },
   'design-review-and-benchmarking':             { status: 'draft' }
 };
