@@ -18,9 +18,11 @@ assets/
   css/style.css         all styling, including both themes and the print sheet
   js/data.js            all content: projects, skills, experience, education, the frame spec
   js/app.js             all behaviour: rendering, theming, filtering, canvas, reveal
+  img/portrait.jpg      the About photo, 760x1643
+  img/portrait.webp     same image, ~1/3 the bytes, served first via <picture>
 ```
 
-Four files. `data.js` and `app.js` are deliberately separate so that editing content never means touching logic.
+Four source files. `data.js` and `app.js` are deliberately separate so that editing content never means touching logic.
 
 `data.js` is plain declarative data — `PROJECTS`, `GROUPS`, `SKILLS`, `EXPERIENCE`, `EDUCATION`, `INTERESTS`, `BYTES`. `app.js` reads it and renders. To add a project, add an object to `PROJECTS`; nothing else changes.
 
@@ -75,7 +77,7 @@ GitHub Pages caches assets for roughly ten minutes. The `?v=` query on the three
 <script src="assets/js/app.js?v=6"></script>
 ```
 
-All three should always carry the same number.
+All three should always carry the same number — and it must only ever go **up**. Two separate edits both landing on `?v=6` once left browsers serving the older of the two files, because the URL never changed. A collision is worse than no cache buster at all, since it looks like it worked.
 
 ## History
 
@@ -88,7 +90,18 @@ Six commits, all on 13 August 2026:
 5. `Add asset cache-busting so updates go live immediately`
 6. `Rebrand: High Voltage — plasma spectrum, one hue per discipline, aurora field, marquee, card tilt` — replaced a copper-on-paper palette with the current one
 
+## The portrait
+
+The source shot is 853x1844 — roughly 2.16:1. That aspect is why the About section is two columns above 880px rather than a centred stack: a portrait that tall stacked above the text pushes everything below the fold.
+
+It is shown whole. `.portrait img` is `width:100%; height:auto` with no `object-fit`, so nothing is ever cropped — the frame takes the shape of the photo instead of the photo being cut to fit the frame.
+
+It is served as WebP with a JPEG fallback through `<picture>`: 1.5 MB PNG in, 37 KB WebP out.
+
 ## Outstanding
 
 - The LinkedIn href in `index.html` is marked `TODO` and has not been verified as claimed.
-- The About section uses an "YA" monogram placeholder instead of a photo. The replacement markup is already written in a comment above it; it needs a square image at `assets/img/portrait.jpg`.
+- The phone number in the contact section is public and will be scraped. Remove it if that matters.
+- Per-project READMEs describing what each build taught me are being written. Nine of the eleven
+  repositories are private, so those write-ups will not be publicly readable until the repos are
+  opened or the narrative is mirrored somewhere public.
