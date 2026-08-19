@@ -47,7 +47,7 @@ const SKILLS = [
     { n:'Resonant RLC',         m:['RLC'] },
     { n:'Strain & temperature', m:['strain','LPBF','thermal'] },
     { n:'DAQ ~500 Hz',          m:['Hall-effect','RP2040'] },
-    { n:'LiDAR & GPS',          m:['LiDAR'] },
+    { n:'Ultrasonic & GPS',     m:['ultrasonic','GPS'] },
     { n:'OBD-II · BMW ISTA',    m:['OBD-II','ISTA'], exp:'BMW' }
   ]},
   { t:'Software & data', g:'code', hue:'sw', items:[
@@ -122,7 +122,7 @@ const AWARDS = [
   { place:'2nd place', prize:3000, name:'TVG Hackathon', accent:'sw',
     d:'HeatRouter — a district-heating planner routing waste heat from datacenters and transit tunnels to buildings that need it, along real road geometry.' },
   { place:'2nd place', prize:1000, name:'Designathon', accent:'sn',
-    d:'LiDAR and GPS smart-bin product with a dashboard to optimise trash layout and collection routing.' },
+    d:'ESP32 bin sensing fill level by ultrasonic ranging and reporting position by GPS, with a Flask dashboard planning collection routes.' },
   { place:'Scholarship', prizeText:'Full tuition', name:'UT Austin Honors Scholarship', accent:'hw',
     d:'Full tuition awarded — Cockrell School of Engineering.' }
 ];
@@ -209,10 +209,10 @@ const PROJECTS = [
     stats:[['placed','2nd'],['prize','$4,000'],['audio','never leaves the box']],
     links:[['Momentum — team repo','https://github.com/Datlightning/MomentumBuildathon']] },
 
-  { g:'wins', cover:'grid', slug:'lidar-smart-bin', title:'LiDAR Smart Bin', when:'Designathon · 2nd, $1,000',
-    stack:'LiDAR · GPS · routing dashboard',
-    d:'A LiDAR and GPS bin that measures how full it actually is and where, with a dashboard that optimises both internal trash layout and collection routing. Sensing a physical quantity nobody was measuring, then doing something useful with it.',
-    stats:[['placed','2nd'],['prize','$1,000'],['sensing','LiDAR + GPS']],
+  { g:'wins', cover:'grid', slug:'lidar-smart-bin', title:'Ultrasonic Smart Bin', when:'Designathon · 2nd, $1,000',
+    stack:'ESP32 · HC-SR04 ultrasonic · TinyGPS++ · WebSockets · Flask',
+    d:'An ESP32 in a bin measures how full it is and reports where it is. An HC-SR04 pings the distance down from the lid, a GPS module fixes the location, and both stream over a WebSocket to a Flask server that turns distance into a fill percentage and plans collection routes. The interesting constraint was cost: an ultrasonic ranger is about two dollars and gives you one number, so everything downstream had to be useful with one number per bin.',
+    stats:[['placed','2nd'],['prize','$1,000'],['sensing','ultrasonic + GPS']],
     links:[['No public repository','']] },
 
   { g:'nda', cover:'doc', slug:'ai-cross-document-verification', title:'AI Cross-Document Verification', when:'2026 · GE Vernova',
