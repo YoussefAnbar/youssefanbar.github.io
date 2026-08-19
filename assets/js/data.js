@@ -160,7 +160,7 @@ const PROJECTS = [
     stats:[['framework','NASA JPL F′'],['language','C++'],['target','Linux / ARM']],
     links:[['Texas Spacecraft Laboratory','']] },
 
-  { g:'hardware', cover:'arm', slug:'inhabit-robotics-teleop-hand-and-can-joints', title:'Inhabit Robotics — Teleop Hand &amp; CAN Joints', when:'2026 – present',
+  { g:'hardware', cover:'arm', shot:'inhabit-encoder-macro', slug:'inhabit-robotics-teleop-hand-and-can-joints', title:'Inhabit Robotics — Teleop Hand &amp; CAN Joints', when:'2026 – present',
     stack:'Unitree G1 EDU (Dex3-1) · xr_teleoperate · STM32C011 · CAN · SPI-CAN · MT6701 magnetic encoders',
     d:'Co-founded. Built a dexterous teleop hand on the Unitree G1, mapping operator joint poses to force-controlled actuators, and demoed it to VCs in San Francisco. V2 is a daisy-chainable CAN-bus joint architecture with auto-enumeration, so the base controller works out module order all the way to the end-effector rather than being told.',
     stats:[['status','in talks · Tess Ventures'],['bus','CAN · SPI-CAN'],['V2','auto-enumerating']],
@@ -191,7 +191,7 @@ const PROJECTS = [
     stats:[['commits','349'],['merged PRs','274'],['test floor','6 000']],
     links:[['Inhabit-Software','https://github.com/YoussefAnbar/Inhabit-Software','private']] },
 
-  { g:'systems', cover:'net', slug:'teleoperation-console', title:'Teleoperation Console', when:'2026',
+  { g:'systems', cover:'net', shot:'inhabit-arm', slug:'teleoperation-console', title:'Teleoperation Console', when:'2026',
     stack:'TypeScript · Vite · WebSockets · CCD / DLS IK',
     d:'Drag an arm in a browser and a simulated robot follows at 100&nbsp;Hz. I ported CPython’s Mersenne Twister to TypeScript — the <code>init_by_array</code> seeding path it uses for integer seeds, the 53-bit double built from two words rather than one, the rejection loop inside <code>_randbelow</code> — so the demo and the bench draw the same noise from the same seed. An embarrassingly long weekend, and I still owe it a committed parity fixture.',
     stats:[['loop','100 Hz'],['RNG','CPython-faithful'],['commits','51']],

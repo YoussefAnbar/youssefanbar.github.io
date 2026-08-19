@@ -68,6 +68,13 @@
           '<path d="M52 40l90-12M52 40l90 26M52 40l90 62M52 92l90-62M52 92l90-24M52 92l90 12' +
           'M158 26l90 36M158 66h90M158 106l90-36" opacity=".45"/>'
   };
+  // A real photograph beats generated art whenever one exists.
+  function photo(name, alt) {
+    return '<picture><source srcset="assets/img/work/' + name + '.webp" type="image/webp">' +
+      '<img src="assets/img/work/' + name + '.jpg" alt="' + alt.replace(/&amp;/g,'and').replace(/"/g,'') +
+      '" loading="lazy" decoding="async" width="1400" height="788"></picture>';
+  }
+
   function cover(kind) {
     return '<svg viewBox="0 0 300 132" preserveAspectRatio="xMidYMid slice" aria-hidden="true" ' +
       'fill="none" stroke="' + C + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
@@ -240,7 +247,8 @@
           '<article class="card" data-rv data-hay="' +
             (p.title + ' ' + p.stack + ' ' + p.d + ' ' + p.stats.map(s => s[0]).join(' '))
               .replace(/<[^>]+>/g, ' ').replace(/"/g, '').toLowerCase() + '">' +
-            '<div class="card-cover">' + cover(p.cover) + '</div>' +
+            '<div class="card-cover' + (p.shot ? ' is-photo' : '') + '">' +
+              (p.shot ? photo(p.shot, p.title) : cover(p.cover)) + '</div>' +
             '<div class="card-body">' +
               '<div class="card-head"><h4 class="card-t">' + p.title + '</h4>' +
               '<span class="card-w">' + p.when + '</span></div>' +

@@ -100,8 +100,84 @@ const STORIES = {
      Everything below is scaffolding — the page renders the project
      overview and an honest "in progress" note until it is written.
      --------------------------------------------------------------- */
+  /* ---------------------------------------------------------------
+     Written from Inhabit/JOURNAL.md and the repository history.
+     --------------------------------------------------------------- */
+  'inhabit-robotics-teleop-hand-and-can-joints': {
+    status: 'ready',
+    lede: `A modular robot joint you can daisy-chain: each pod carries its own MCU, its own magnetic
+           encoder, and a CAN transceiver, so an arm is assembled rather than wired. The board is one
+           repository, the firmware is another, and the eight-byte frame between them is the only
+           thing they are allowed to agree on.`,
+    sections: [
+      { h: 'Why a magnet, and not an optical encoder',
+        p: `The MT6701 is the reason the joint knows where it is. A diametrically magnetised magnet
+            sits on the shaft and the chip underneath reads the field vector — <b>no contact, nothing
+            to wear, and it works straight through the plastic housing</b>. An optical encoder would
+            need a window, and a window is a place for dust to get in.` },
+      { h: 'The tradeoff that became a fault bit',
+        p: `Magnetic sensing cares a great deal about how far the magnet sits from the die and how
+            well it is centred. Get it wrong and the chip still returns an angle — a confident,
+            completely wrong angle. So <code>MAGNET_OOB</code> became one of the six fault bits in the
+            wire format rather than something the firmware quietly tolerates.`,
+        quote: `A sensor that can no longer see is required to say so. It is not allowed to guess.` },
+      { h: 'Two repositories, one contract',
+        p: `The board repo holds the schematic, the layout, the BOM, the encoder symbol and footprint,
+            and a STEP export for mechanical fit. It contains <b>no firmware at all</b> — no
+            <code>.c</code>, no <code>.h</code>, no Makefile, in any of the 27 commits. The C that runs
+            on the pod lives in the software repo, and the CAN format the board speaks is defined in
+            <code>can_frame.h</code> with a byte-identical Python mirror in <code>codec.py</code>.
+            Anyone reading only one repository sees half the system.` },
+      { h: 'What is deliberately not committed',
+        p: `No Gerbers, no drill files. <code>.gitignore</code> has excluded the fabrication outputs
+            since the first commit — they regenerate from the source documents, and committing them
+            invites the two drifting apart. Two <code>.zip</code> archives did get committed early on,
+            4.1&nbsp;MB and 1.7&nbsp;MB, and that was a mistake: opaque to diff, permanent in the
+            history, and meaningless in a year.` }
+    ],
+    diagrams: [
+      { src:'assets/img/work/inhabit-encoder-macro.jpg',
+        alt:'Macro view of the encoder board seated in the joint face',
+        cap:'The MT6701 in its SOIC package, seated in the joint face. Four mounting holes, decoupling passives either side, and the pad rows that carry power and the SPI lines out to the pod MCU.' },
+      { src:'assets/img/work/inhabit-exploded.jpg',
+        alt:'Exploded view of a joint showing housing, bearing, magnet, encoder board and harness',
+        cap:'Exploded. The magnet rides on the shaft, the encoder board faces it across a fixed air gap, and the harness carries power and the CAN pair through to the next pod.' },
+      { src:'assets/img/work/inhabit-arm.jpg',
+        alt:'Full arm assembled from daisy-chained joint modules',
+        cap:'Assembled. Every joint is the same module; the base controller works out their order by enumeration rather than being told.' }
+    ],
+    decisions: [
+      { d: 'Freeze the wire format before either side is written',
+        why: `Eight bytes, fixed field order, XOR checksum. It is the only interface between a board
+              in C and a host in Python, so it was defined first and has not moved since. New
+              capability means a new arbitration ID, never a redefined field.` },
+      { d: 'Keep the raw ADC reading on the wire alongside the calibrated angle',
+        why: `It costs two bytes of a very tight frame. It buys the ability to recompute every episode
+              ever recorded if calibration later turns out to be wrong — which is not a decision you
+              can reverse after the fact.` }
+    ],
+    journal: [
+      { when: '22 April 2026', p: `Seven commits, zero commit messages. I was treating git as a save
+              button rather than a record, and four of them predate the remote by ninety seconds.` },
+      { when: '23 April 2026', p: `Added the MT6701 symbol, footprint, and the STEP export for
+              mechanical fit. Three of the day's ten commits changed no files at all — the reflex of
+              committing after Altium has already saved.` },
+      { when: '24 April 2026 — the collision', p: `A teammate pushed from the wrong working directory
+              and <b>deleted the PCB document from the repository</b>. Three hours later it came back
+              in a commit titled "from correct folder". My side was a twelve-minute recovery burst:
+              resolve, restore, restore again. Two full-file rewrites of the project file in five
+              hours, in opposite directions.` },
+      { when: 'What it taught me', p: `<b>Altium binaries cannot be merged.</b> Git will happily let
+              two people edit a <code>.PcbDoc</code> and then hand you a conflict no tool on earth can
+              resolve — there is no three-way merge for an OLE compound file. The only workable
+              discipline is one person holding a document at a time, agreed out of band. We had been
+              using git as if the files were text. They are not.` },
+      { when: '10 June 2026', p: `"Save final PCB routing before JLCPCB order" — the commit where it
+              stopped being a file and started being a thing that costs money to get wrong.` }
+    ]
+  },
+
   'cdh-flight-software':                        { status: 'draft' },
-  'inhabit-robotics-teleop-hand-and-can-joints':{ status: 'draft' },
   'tinycore-industries-micro-drone-hat':        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },

@@ -707,3 +707,7 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
   .logo{ margin-right:auto; }
   .nav-links{ margin-inline:0; }
 }
+
+/* A card cover carrying a real photograph rather than generated line art. */
+.card-cover.is-photo{ background:#000; }
+.card-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
