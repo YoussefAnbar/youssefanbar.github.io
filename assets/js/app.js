@@ -27,7 +27,10 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || ICON.chip) + '</svg>';
 
   /* ---------- project cover art ------------------------------------- */
-  const C = 'var(--copper-2)', D = 'var(--copper)';
+  // --c1 is the hardware accent: cyan in dark, a darker teal in light. Keep
+  // the fallback — an undefined custom property with no fallback makes the
+  // stroke declaration invalid, which computes to none and hides every cover.
+  const C = 'var(--c1, #22E0FF)';
   const COVER = {
     board:'<path d="M20 100h48l26-28h60l24 26h92" /><path d="M20 40h34l22 24h84" /><path d="M232 40v34l-20 20"/>' +
           '<circle cx="68" cy="100" r="5"/><circle cx="94" cy="72" r="5"/><circle cx="154" cy="72" r="5"/>' +
@@ -74,7 +77,9 @@
       const dark = document.documentElement.dataset.theme === 'dark';
       btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
       btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-      if (meta) meta.setAttribute('content', dark ? '#17140F' : '#F7F3EC');
+      // These must track --bg in style.css, or the browser chrome ends up a
+      // different colour from the page sitting behind it.
+      if (meta) meta.setAttribute('content', dark ? '#06070F' : '#F6F7FC');
     };
     btn.addEventListener('click', function () {
       const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
