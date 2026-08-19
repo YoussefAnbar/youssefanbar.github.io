@@ -59,11 +59,16 @@ code{ font-family:var(--mono); font-size:.85em; background:var(--bg3); padding:.
 .aurora{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .aurora i{
   position:absolute; display:block; border-radius:50%;
-  filter:blur(100px); opacity:.20; will-change:transform;
+  filter:blur(130px); opacity:.10; will-change:transform;
+}
+/* keeps the middle of the viewport clean so headlines never sit on a muddy mix */
+.aurora::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(58% 46% at 50% 40%, var(--bg) 0%, rgba(250,250,252,.72) 45%, transparent 78%);
 }
 .aurora i:nth-child(1){ width:48vw; height:48vw; left:-10vw;  top:-12vw;   background:var(--c1); }
 .aurora i:nth-child(2){ width:42vw; height:42vw; right:-10vw; top:26vh;    background:var(--c3); }
-.aurora i:nth-child(3){ width:40vw; height:40vw; left:28vw;   bottom:-14vw;background:var(--c2); }
+.aurora i:nth-child(3){ width:34vw; height:34vw; left:12vw;   bottom:-18vw;background:var(--c2); }
 @media (prefers-reduced-motion:no-preference){
   .aurora i:nth-child(1){ animation:drift1 34s var(--ease) infinite alternate; }
   .aurora i:nth-child(2){ animation:drift2 42s var(--ease) infinite alternate; }
@@ -123,7 +128,7 @@ main,.navbar{ position:relative; z-index:2; }
 /* =====================================================================
    hero
    ===================================================================== */
-.welcome{ min-height:clamp(30rem,84vh,46rem); display:grid; place-items:center; text-align:center;
+.welcome{ min-height:clamp(26rem,72vh,38rem); display:grid; place-items:center; text-align:center;
   padding:clamp(3rem,9vh,6rem) var(--pad); }
 .welcome-inner{ max-width:52rem; }
 .hey{ font-family:var(--mono); font-size:.82rem; color:var(--c2); margin:0 0 .8rem;
@@ -151,9 +156,9 @@ main,.navbar{ position:relative; z-index:2; }
   border:1px solid var(--line2); border-radius:999px; background:var(--bg2);
   box-shadow:var(--sh-1);
 }
-.tagline{ margin:1.6rem auto 0; max-width:36rem; font-size:clamp(1rem,1.6vw,1.18rem); color:var(--fg2); }
+.tagline{ margin:1.4rem auto 0; max-width:36rem; font-size:clamp(1rem,1.6vw,1.18rem); color:var(--fg2); }
 
-.scroll-cue{ display:inline-grid; place-items:center; width:44px; height:66px; margin-top:2.4rem; }
+.scroll-cue{ display:inline-grid; place-items:center; width:44px; height:52px; margin-top:1.6rem; }
 .scroll-cue span{ display:block; width:2px; height:42px; border-radius:2px;
   background:linear-gradient(var(--line2),transparent); position:relative; overflow:hidden; }
 @media (prefers-reduced-motion:no-preference){
@@ -552,6 +557,7 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
   display:inline-flex; align-items:center; gap:.45rem; min-height:44px;
   padding:0 .95rem; border-radius:999px; cursor:pointer;
   font-family:var(--mono); font-size:.75rem; letter-spacing:.06em;
+  white-space:nowrap; flex:none;
   background:var(--bg2); color:var(--fg); border:1px solid var(--line2);
   box-shadow:var(--sh-1);
   transition:border-color 220ms var(--ease), color 220ms var(--ease),
@@ -565,7 +571,7 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
 
 .menu-list{
   position:absolute; right:0; top:calc(100% + .55rem); z-index:50;
-  min-width:16.5rem; padding:.4rem; border-radius:18px;
+  min-width:16.5rem; max-width:min(20rem, calc(100vw - 2rem)); padding:.4rem; border-radius:18px;
   background:var(--bg2); border:1px solid var(--line);
   box-shadow:0 20px 50px -24px rgba(16,20,40,.45), var(--sh-1);
 }
