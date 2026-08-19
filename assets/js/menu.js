@@ -46,16 +46,36 @@
   const list = document.getElementById('menu-list');
   const items = Array.prototype.slice.call(list.querySelectorAll('[role="menuitem"]'));
 
+  // Anchor the panel to the button in viewport coordinates and clamp it to the
+  // screen. Absolute positioning depended on the navbar laying out exactly as
+  // expected; this does not care where the button ends up.
+  function place() {
+    const r = btn.getBoundingClientRect();
+    const M = 12;
+    list.style.position = 'fixed';
+    list.style.right = 'auto';
+    list.style.top = Math.round(r.bottom + 8) + 'px';
+    const w = list.offsetWidth || 264;
+    let left = r.right - w;                                   // right edge aligns to the button
+    left = Math.max(M, Math.min(left, innerWidth - w - M));    // never leave the viewport
+    list.style.left = Math.round(left) + 'px';
+  }
+
   function open() {
     list.hidden = false;
     host.classList.add('is-open');
     btn.setAttribute('aria-expanded', 'true');
+    place();
+    addEventListener('resize', place);
+    addEventListener('scroll', place, { passive: true });
     document.addEventListener('pointerdown', outside, true);
   }
   function close(focusBtn) {
     list.hidden = true;
     host.classList.remove('is-open');
     btn.setAttribute('aria-expanded', 'false');
+    removeEventListener('resize', place);
+    removeEventListener('scroll', place);
     document.removeEventListener('pointerdown', outside, true);
     if (focusBtn) btn.focus();
   }

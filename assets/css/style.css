@@ -552,7 +552,7 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
 /* =====================================================================
    navbar utility menu
    ===================================================================== */
-.menu{ position:relative; flex:none; }
+.menu{ position:relative; flex:none; margin-left:auto; }
 .menu-btn{
   display:inline-flex; align-items:center; gap:.45rem; min-height:44px;
   padding:0 .95rem; border-radius:999px; cursor:pointer;
@@ -693,3 +693,17 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
 /* A text award (e.g. "Full tuition") sits where a figure would, one size down
    so it still reads as the headline without wrapping awkwardly. */
 .aw-prize.is-text{ font-size:clamp(1.5rem,2.8vw,2rem); letter-spacing:-.025em; }
+
+/* The menu is pinned right by margin-left:auto; these auto margins put the nav
+   back in the optical centre instead of letting it collapse toward the logo. */
+/* Autos on the OUTER two items only. The logo pushes right, the menu pushes
+   left, and the nav is left centred between them — deterministic, and it does
+   not depend on justify-content resolving the way I expect. */
+@media (min-width:801px){
+  .logo{ margin-right:auto; }
+  .menu{ margin-left:auto; }
+}
+@media (max-width:800px){
+  .logo{ margin-right:auto; }
+  .nav-links{ margin-inline:0; }
+}
