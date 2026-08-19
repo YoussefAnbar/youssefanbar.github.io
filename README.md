@@ -1,89 +1,94 @@
-# Portfolio — Youssef Anbar
+# youssefanbar.github.io
 
-A quiet, personal single-page portfolio. Hand-authored HTML, CSS, and JavaScript.
-No framework, no build step, no dependencies, no template.
+My portfolio. Hand-written HTML, CSS, and JavaScript — no framework, no bundler, no build step, no template. Served by GitHub Pages as a user site straight from the repository root, so what is in `main` is what is live.
+
+Live at **https://youssefanbar.github.io**
+
+## Why it is built this way
+
+A portfolio that claims I can work close to the metal should not need a toolchain to render a list of projects. Everything here is three files a browser can read directly. If you view source, you see the site — there is no compiled bundle in between.
+
+The cost of that choice is real and worth naming: no component reuse, no type checking, and content lives in a JavaScript array rather than a CMS. For a single-page site that one person edits, that trade is fine. It would not be at ten pages.
+
+## Layout
 
 ```
-portfolio/
-├── index.html              structure and the written copy
-└── assets/
-    ├── css/style.css       design system, both themes, all styling
-    └── js/
-        ├── data.js         the content — work, groups, byte map, timeline
-        └── app.js          theme, copper routing, entries, interaction
+index.html              the whole document — every section, in order
+assets/
+  css/style.css         all styling, including both themes and the print sheet
+  js/data.js            all content: projects, skills, experience, education, the frame spec
+  js/app.js             all behaviour: rendering, theming, filtering, canvas, reveal
 ```
 
-## Run it
+Four files. `data.js` and `app.js` are deliberately separate so that editing content never means touching logic.
 
-```bash
-python -m http.server 4321 --directory portfolio
-```
+`data.js` is plain declarative data — `PROJECTS`, `GROUPS`, `SKILLS`, `EXPERIENCE`, `EDUCATION`, `INTERESTS`, `BYTES`. `app.js` reads it and renders. To add a project, add an object to `PROJECTS`; nothing else changes.
 
-Open <http://localhost:4321>. Any static server works — there is nothing to compile.
+## Design system
 
-## Deploy
+Four accent hues, one per discipline, used as an index rather than as decoration. The same colour means the same thing everywhere on the page.
 
-Static, so anything will host it:
+| Variable | Meaning | Dark | Light |
+|---|---|---|---|
+| `--c1` | hardware | `#22E0FF` | `#00778F` |
+| `--c2` | firmware | `#9B6BFF` | `#6236CE` |
+| `--c3` | sensing | `#FF3D8B` | `#C2185B` |
+| `--c4` | software | `#FFB020` | `#8A5A00` |
 
-```bash
-npx vercel deploy --prod
-```
+Backgrounds are `#06070F` dark and `#F6F7FC` light. Dark is the designed default — the palette is built on emitted light, and light mode is a tuned variant rather than an inversion, which is why the accents are different hex values in each theme instead of the same colour on a flipped background.
 
-Project root `portfolio/`, framework preset "Other", no build command. GitHub Pages works equally
-well — push `portfolio/` and enable Pages on the branch root.
+Type is Space Grotesk for display and body, IBM Plex Mono for code and labels.
 
-## Structure
+### Contrast
 
-A conventional, scannable résumé shape — hero, about, skills, experience, projects, detail, contact —
-so a recruiter can find what they need in fifteen seconds.
+Measured against the background of each theme, WCAG 2.1 relative luminance:
 
-**Honest grouping over flattering grouping.** Projects sit in five groups that say what things
-actually are: hardware and firmware first because that is the point; then the software that serves
-it; then work under NDA, described rather than linked; then the side projects that exist to practise
-shipping and positioning, labelled as exactly that; then the foundations. Nothing is dressed up as
-more than it is.
+| | Dark on `#06070F` | Light on `#F6F7FC` |
+|---|---|---|
+| `--fg` body text | 17.61:1 | 18.08:1 |
+| `--fg2` secondary | 9.31:1 | 8.85:1 |
+| `--fg3` muted | 5.57:1 | 5.32:1 |
+| `--c1` hardware | 12.61:1 | 4.86:1 |
+| `--c2` firmware | 5.68:1 | 6.68:1 |
+| `--c3` sensing | 6.02:1 | 5.49:1 |
+| `--c4` software | 10.99:1 | 5.54:1 |
 
-**Warm rather than corporate.** Copper on paper — copper because it is the only material here that
-was ever ordered by the square inch. Fraunces for display, Source Serif 4 for reading, IBM Plex Mono
-for anything numeric. Light and dark themes, both designed rather than inverted, with the choice
-persisted and the system preference respected on first visit.
-
-**The cursor routes copper.** The background canvas grows traces toward the pointer the way a board
-is actually routed: one orthogonal run, then a 45° break, with a via at every direction change.
-Segments oxidise away after a few seconds. Fine pointers only, and disabled under reduced-motion.
-
-**The header retracts as you read** and returns the moment you scroll up, because on a phone it is
-worth about 14% of the viewport. It also un-retracts if a keyboard user tabs into it.
+Every pair clears AA for normal text (4.5:1). The tightest is `--c1` in light mode at 4.86:1, which is why the light-mode cyan is a considerably darker teal than the dark-mode one — the obvious choice failed and had to be retuned.
 
 ## Accessibility
 
-Verified in-browser, not assumed:
-
-- Contrast measured on 17 real text/background pairs across **both** themes — zero failures, weakest
-  is 4.77:1, body text 7.28:1 (light) and 9.08:1 (dark)
-- All interactive targets ≥ 44 px tall
-- Sequential heading order, one `<h1>`, skip link, `lang` set
-- No horizontal scroll at 375 px or 1440 px; body text 17 px so iOS never auto-zooms
-- On small screens the nav drops to its own scrollable row rather than disappearing — a 16,000 px
-  page with no navigation is not a minimal design, it is a broken one
-- Theme is set before first paint, so there is no flash of the wrong theme
-- `prefers-reduced-motion` disables the routing canvas, the reveals, and the header transition
-- Reveal styling is scoped to `.js` with a 2.5 s safety net, so a blocked script or a throttled tab
-  can never leave content stuck at `opacity: 0`
-- Print stylesheet drops the chrome and avoids breaking cards mid-page
-
-## Before you deploy
-
-- **The LinkedIn URL in `index.html` is unverified.** It is the custom URL recommended in
-  `LINKEDIN-PACK.md`, not a profile confirmed to exist. Claim it on LinkedIn or change the `href`.
-  There is a `TODO` comment on the line.
+- `prefers-reduced-motion` is honoured in both CSS and JS. The cursor-tracked canvas, the card tilt, and the reveal stagger are all skipped rather than merely shortened, and smooth scrolling falls back to instant.
+- Interactive targets are at least 44px.
+- The theme toggle and the skill badges carry `aria-pressed`; the filter bar and the byte reader are `aria-live`.
+- Focus-visible outlines are styled rather than removed.
+- A print stylesheet exists, because the most likely reason someone prints this is a recruiter who wants it on paper.
+- The reveal animation has a 2.5 second safety timeout in `app.js`, so a failure of `IntersectionObserver` can never leave content permanently hidden.
+- `<noscript>` points at `assets/js/data.js`, which reads fine as plain text.
 
 ## Editing
 
-- **`index.html`** — hero, about copy, section headings, contact. Edit directly.
-- **`assets/js/data.js`** — `SKILLS`, `EXPERIENCE`, `EDUCATION`, `GROUPS`, `PROJECTS`, `BYTES`.
+GitHub Pages caches assets for roughly ten minutes. The `?v=` query on the three asset references in `index.html` is a cache buster — **bump it every time you edit the CSS or JS**, or the change will not reach anyone holding a cached copy:
 
-To add a project, append an object to `PROJECTS` and set `g` to one of the group ids in `GROUPS`
-(`hardware`, `systems`, `nda`, `craft`, `roots`). A link with a third element of `'private'` renders
-as a padlock instead of a hyperlink — nine of the eleven repositories are private, and a 404 reads
-worse than an honest lock.
+```html
+<link rel="stylesheet" href="assets/css/style.css?v=6">
+<script src="assets/js/data.js?v=6"></script>
+<script src="assets/js/app.js?v=6"></script>
+```
+
+All three should always carry the same number.
+
+## History
+
+Six commits, all on 13 August 2026:
+
+1. `Portfolio site` — the first working version
+2. `Restructure: centred layout, pill headers, alternating timeline, project card grid`
+3. `Resistor-code skill badges with skill-to-project cross-filter`
+4. `Fix badge matching: word boundaries, STM32C011 term, encoder in stack` — naive substring matching had "CAN" hitting "cannot" and "C" hitting everything; replaced with word-boundary regexes that treat `+ # / .` as part of a token so `C/C++` and `ROS 2` behave
+5. `Add asset cache-busting so updates go live immediately`
+6. `Rebrand: High Voltage — plasma spectrum, one hue per discipline, aurora field, marquee, card tilt` — replaced a copper-on-paper palette with the current one
+
+## Outstanding
+
+- The LinkedIn href in `index.html` is marked `TODO` and has not been verified as claimed.
+- The About section uses an "YA" monogram placeholder instead of a photo. The replacement markup is already written in a comment above it; it needs a square image at `assets/img/portrait.jpg`.
