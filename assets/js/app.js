@@ -219,6 +219,8 @@
     const host = $('#proj');
     if (!host || typeof GROUPS === 'undefined' || typeof PROJECTS === 'undefined') return;
 
+    const hasStory = s => typeof STORIES !== 'undefined' && STORIES[s] && STORIES[s].status === 'ready';
+
     function linkHTML(l) {
       if (l[2] === 'private') {
         const t = l[1] ? 'Private repository — happy to walk through it' : 'Confidential — employer work';
@@ -246,7 +248,11 @@
               '<p class="card-d">' + p.d + '</p>' +
               '<dl class="card-stats">' + p.stats.map(s =>
                 '<div><dt>' + s[0] + '</dt><dd>' + s[1] + '</dd></div>').join('') + '</dl>' +
-              '<div class="card-foot">' + p.links.map(linkHTML).join('') + '</div>' +
+              '<div class="card-foot">' +
+                (p.slug ? '<a class="p-link read" href="project.html?p=' + p.slug + '">' +
+                  (hasStory(p.slug) ? 'Read the process' : 'Project page') + ' &rarr;</a>' : '') +
+                p.links.map(linkHTML).join('') +
+              '</div>' +
             '</div>' +
           '</article>').join('') + '</div>' +
       '</section>';
