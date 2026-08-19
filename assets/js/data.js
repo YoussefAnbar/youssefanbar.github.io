@@ -209,7 +209,7 @@ const PROJECTS = [
     stats:[['placed','2nd'],['prize','$4,000'],['audio','never leaves the box']],
     links:[['Momentum — team repo','https://github.com/Datlightning/MomentumBuildathon']] },
 
-  { g:'wins', cover:'grid', slug:'lidar-smart-bin', title:'Ultrasonic Smart Bin', when:'Designathon · 2nd, $1,000',
+  { g:'wins', cover:'grid', slug:'ultrasonic-smart-bin', title:'Ultrasonic Smart Bin', when:'Designathon · 2nd, $1,000',
     stack:'ESP32 · HC-SR04 ultrasonic · TinyGPS++ · WebSockets · Flask',
     d:'An ESP32 in a bin measures how full it is and reports where it is. An HC-SR04 pings the distance down from the lid, a GPS module fixes the location, and both stream over a WebSocket to a Flask server that turns distance into a fill percentage and plans collection routes. The interesting constraint was cost: an ultrasonic ranger is about two dollars and gives you one number, so everything downstream had to be useful with one number per bin.',
     stats:[['placed','2nd'],['prize','$1,000'],['sensing','ultrasonic + GPS']],
