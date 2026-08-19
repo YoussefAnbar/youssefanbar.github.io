@@ -123,8 +123,8 @@ const AWARDS = [
     d:'Privacy-first customer-service escalation system using Google Gemini sentiment analysis to flag escalating discussions via dashboard.' },
   { place:'2nd place', prize:1000, name:'Designathon', accent:'sn',
     d:'LiDAR and GPS smart-bin product with a dashboard to optimise trash layout and collection routing.' },
-  { place:'Scholarship', prize:36000, name:'UT Austin Honors Scholarship', accent:'hw',
-    d:'Cockrell School of Engineering.' }
+  { place:'Scholarship', prizeText:'Full tuition', name:'UT Austin Honors Scholarship', accent:'hw',
+    d:'Full tuition awarded — Cockrell School of Engineering.' }
 ];
 
 const EDUCATION = [

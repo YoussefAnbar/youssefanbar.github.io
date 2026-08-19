@@ -268,7 +268,9 @@
     host.innerHTML = AWARDS.map(function (a) {
       return '<article class="award" style="--c:' + (HUE[a.accent] || HUE.hw) + '" data-rv>' +
         '<span class="aw-place">' + a.place + '</span>' +
-        '<b class="aw-prize" data-count="' + a.prize + '">$' + a.prize.toLocaleString('en-US') + '</b>' +
+        (a.prizeText
+          ? '<b class="aw-prize is-text">' + a.prizeText + '</b>'
+          : '<b class="aw-prize" data-count="' + a.prize + '">$' + a.prize.toLocaleString('en-US') + '</b>') +
         '<p class="aw-name">' + a.name + '</p>' +
         '<p class="aw-d">' + a.d + '</p>' +
       '</article>';

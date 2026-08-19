@@ -683,3 +683,7 @@ a.p-link:hover{ border-bottom-color:var(--c2); }
 .proj-draft h2{ border-bottom:0; padding-bottom:0; margin-bottom:.7rem; }
 .proj-draft-note{ font-family:var(--mono); font-size:.78rem; color:var(--fg3) !important; }
 .proj-back{ margin-top:clamp(2.5rem,6vh,3.5rem); }
+
+/* A text award (e.g. "Full tuition") sits where a figure would, one size down
+   so it still reads as the headline without wrapping awkwardly. */
+.aw-prize.is-text{ font-size:clamp(1.5rem,2.8vw,2rem); letter-spacing:-.025em; }
