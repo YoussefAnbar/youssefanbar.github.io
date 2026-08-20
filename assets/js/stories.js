@@ -849,12 +849,135 @@ const STORIES = {
   },
 
   /* ---------------------------------------------------------------
+     Written from tinyCore/JOURNAL.md and the repository history.
+     --------------------------------------------------------------- */
+  'tinycore-industries-micro-drone-hat': {
+    status: 'ready',
+    lede: `A micro-drone HAT built on an ESP32-S3-MINI-1-N8: USB-C in, single-cell Li-ion charging, a
+           six-axis IMU, a micro-SD socket, a Qwiic port, and MOSFET low-side switching for four
+           brushed coreless motors. Two layers, Altium, 58 commits between 24 August 2025 and 27 May
+           2026. The first of those commits is not mine, and 52 of the 58 carry no message at all —
+           and both of those facts are more interesting than the board.`,
+    sections: [
+      { h: 'Where this starts, and who wrote the first commit',
+        p: `The repository does not begin with me. Commit 1, <code>d12fdbd</code>, 24 August 2025,
+            author <b>Geoffrey McIntyre</b>, message: a directory copy from an Altium 365 workspace. It
+            brought in <code>iotaTemplate.SchDoc</code>, <code>iotaTemplate - 2 Layer.PcbDoc</code>,
+            <code>iotaTemplate.IntLib</code>, two CAMtastic files, and a project called
+            <code>tinyLantern.PrjPcb</code> — a lab base called <b>iotaTemplate</b> carrying somebody
+            else&rsquo;s project called <b>tinyLantern</b>. On 6 March 2026 I renamed it, in three
+            commits twenty-five seconds apart, and everything after that is mine.
+            <b>The layer stack, the board outline, the output-job configuration and the initial
+            component library are inherited.</b> <code>iotaTemplate.IntLib</code> was never renamed and
+            still sits in the repository under its original name, which is an honest marker of where
+            the board came from.`,
+        quote: `Better to write that down than have someone run git log and find it.` },
+      { h: 'What is actually on it',
+        p: `<code>tinyDrone.BomDoc</code> is one of only two files here that is not opaque binary — it
+            is Altium&rsquo;s pipe-delimited LiveBOM format, so the parts list can be read without
+            opening Altium at all. Twenty-two catalogue items:`,
+        list: [
+          '<b>Compute</b> — <code>ESP32-S3-MINI-1-N8</code>. Dual-core Xtensa, Wi-Fi and BLE, 8&nbsp;MB flash, PCB antenna on the module.',
+          '<b>Sensing</b> — <code>LSM6DS3TR</code>, a six-axis IMU: three-axis accelerometer plus three-axis gyro.',
+          '<b>Power</b> — <code>AP2112K-3.3</code>, a 600&nbsp;mA LDO for the 3.3&nbsp;V rail; <code>MCP73831T-2ACI/OT</code>, a single-cell Li-ion charger at 4.2&nbsp;V; a <code>DMG2305UX-7</code> P-channel MOSFET (20&nbsp;V, 4.2&nbsp;A), a <code>SI2302DS</code> N-channel, an <code>MBR120</code> Schottky and a <code>1N4148W</code>.',
+          '<b>IO</b> — a <code>USB4105-GF-A</code> USB-C receptacle; a <code>2908-05WB-MG</code> right-angle push-push micro-SD socket; a JST-SH four-pin right-angle Qwiic/STEMMA-QT I²C port; a two-pin 1.25&nbsp;mm battery connector; a <code>KMR211GLFS</code> tact switch; an amber <code>HSMA-C190</code> LED; and 8-pin and 9-pin 0.1" headers.'
+        ] },
+      { h: 'Which describes the board fairly precisely',
+        p: `A USB-C-powered, battery-charging, SD-logging ESP32-S3 board with an IMU, a Qwiic port for
+            whatever else you want to hang off it, and four low-side motor channels. On the mechanical
+            side the motor connectors were replaced with through-hole solder pads for vibration
+            resistance, checked against SolidWorks fits. The BOM is touched in twelve commits between
+            2 April and 5 May and then never again — parts selection finished, layout kept going.` },
+      { h: '5 May 2026 — four sheets become one',
+        p: `<code>f7c1852</code>, +5/−90 in <code>tinyDrone.PrjPcb</code>. It deletes
+            <code>[Document1]</code> through <code>[Document4]</code> — four schematic sheets that had
+            split power, IO and serial the way the textbook says to — plus <code>[Document6]</code>, a
+            reference board I had vendored in a month earlier, and renumbers what is left.
+            <b>From that commit the project is one schematic sheet and one PCB.</b> Splitting a
+            schematic across sheets is how a large design stays readable; this one fits on a page, and
+            the split was buying indirection rather than clarity. The day after, <code>0e9cc10</code>
+            registers the design-rule-check output job. Consolidate, then start rule-checking — that
+            order was right.`,
+        quote: `Reversing a decision that is supposed to be best practice felt wrong and was right.` },
+      { h: '52 of 58 commit messages are empty',
+        p: `Six commits carry any text at all: <code>Added Motors</code>,
+            <code>Added Interfacing</code>, <code>PCB structure</code>,
+            <code>Tracing and Rule checks</code>, <code>Tracing and Cutouts</code>, and the inherited
+            first one. <b>Five of those six are empty commits</b> — zero files changed. I was
+            committing the actual work silently and then immediately committing again with nothing in
+            it, purely to leave a label. <code>1327222</code> &ldquo;Added Motors&rdquo; changes
+            nothing; the schematic edit is in <code>ea374ee</code>, fifteen seconds earlier. It works
+            in a grim way — the labels do mark the phases — but <code>git show</code> on any of them
+            shows you an empty diff, which defeats the point. Altium documents are binary, so there is
+            no diff to fall back on either. Reconstructing what happened in April meant reading which
+            files changed on which dates; what I actually decided is gone.`,
+        quote: `Binary design files make your commit log the only documentation you have.` },
+      { h: 'Still open',
+        list: [
+          '<b>The design cannot be rebuilt from this repository.</b> The BOM references four libraries that are not committed — <code>ECEN5730Lib_2023_05_DS (2).IntLib</code>, <code>tinyCore V3.0.IntLib</code>, <code>SI2302DS.IntLib</code> — plus Altium Content Vault sources. Anyone cloning it cannot open it.',
+          'Five orphaned documents are still in the repository but out of the project, and nothing distinguishes them at a glance from the two files that are live. You have to read <code>tinyDrone.PrjPcb</code> to work out which of the six schematic documents matters.',
+          '<code>tinyCore_original.PcbDoc</code> is 5&nbsp;MB of somebody else&rsquo;s board sitting unexplained in the root. Vendoring a reference design in as a file is a bad way to learn from one.',
+          'Four stale absolute paths inherited from the template are still baked into the output-job records. Inherited configuration is inherited debt.',
+          '<code>Schlib1.SchLib</code> is a 4&nbsp;KB empty stub, and it and <code>PCB1.PcbLib</code> still carry Altium&rsquo;s default names.',
+          '<b>No firmware anywhere.</b> This is a board with an ESP32-S3 on it and nothing to run.'
+        ] }
+    ],
+    decisions: [
+      { d: 'A module, not a bare ESP32-S3',
+        why: `The MINI-1 costs more per unit and removes the entire RF problem — antenna matching,
+              keepouts, certification. There is no RF layout of my own to get wrong and no
+              certification problem to solve. For a board I was going to build in small numbers, that
+              trade is not close.` },
+      { d: 'Two layers',
+        why: `Cheap and fast. On a board carrying a switching charger, an IMU that wants a quiet
+              supply and USB differential pairs, it means the ground return is something you route
+              rather than something you have. That cost is paid in layout time, which is where the
+              end of this project went — the last eight commits touch nothing but the PCB.` },
+      { d: 'Start from the lab template, and say so',
+        why: `It got me a working layer stack, board outline and output configuration without
+              designing any of them. The cost is a repository that still carries someone
+              else&rsquo;s project name in a library filename, and four stale absolute paths baked
+              into the output job that I have never gone back and cleared.` },
+      { d: 'Author the symbols and footprints I could not find',
+        why: `<code>PCB1.PcbLib</code>, <code>Schlib1.SchLib</code> and <code>tinyDrone.SCHLIB</code>
+              were added on 8 May, the point where I started making parts rather than only consuming
+              them. That does not make the design self-contained: it descends from a template, and the
+              BOM still depends on four libraries that were never committed. Both are true at once.` }
+    ],
+    journal: [
+      { when: '24 August 2025', p: `The first commit, and not mine — a directory copy of an Altium 365
+              workspace by Geoffrey McIntyre, carrying <code>iotaTemplate</code> and a project called
+              <code>tinyLantern</code>.` },
+      { when: '6 March 2026', p: `Three commits in twenty-five seconds rename the project to
+              <code>tinyDrone</code> and the template documents to <code>tinyTemplate</code>. The
+              integrated library keeps its old name to this day.` },
+      { when: '3 April 2026', p: `Eight commits, and four schematic sheets imported out of a Downloads
+              folder — at 08:15 the project file still pointed at them there, and seventy-six minutes
+              later they were committed properly and the paths rewritten. They arrived as browser
+              duplicate downloads, so all four are still named with a <code>(1)</code> in them.` },
+      { when: '5 April 2026', p: `Thirteen commits, and the one I would most like back: an unzipped
+              GitHub archive of a <em>different</em>, properly structured <code>tinyCore</code>
+              repository, whose PCB I pulled in wholesale as a reference and renamed
+              <code>_original</code>. Five megabytes of context nobody can read.` },
+      { when: '5–6 May 2026', p: `The de-scope, and then the DRC output job the following day.` },
+      { when: '8 May 2026', p: `<code>PCB1.PcbLib</code> and <code>Schlib1.SchLib</code> at 01:36,
+              <code>tinyDrone.SCHLIB</code> seventeen minutes later. Default Altium names, never
+              changed.` },
+      { when: '15 – 27 May 2026', p: `The last eight commits touch only the PCB — layout alone to the
+              end. Nearly every timestamp in this repository falls between midnight and 08:00 UTC,
+              which is its own kind of record.` },
+      { when: 'What I would fix first', p: `Write the commit message on the commit that contains the
+              work. Everything else on the open list is a cleanup task with a known answer; that one
+              is the reason all of this had to be reconstructed rather than read.` }
+    ]
+  },
+
+  /* ---------------------------------------------------------------
      Everything below is scaffolding — the page renders the project
      overview and an honest "in progress" note until it is written.
      These have no development journal to write from yet.
      --------------------------------------------------------------- */
   'cdh-flight-software':                        { status: 'draft' },
-  'tinycore-industries-micro-drone-hat':        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },
   'ultrasonic-smart-bin':                       { status: 'draft' },
