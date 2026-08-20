@@ -1036,8 +1036,8 @@ const STORIES = {
       { h: 'Who wrote which half',
         p: `The PlatformIO scaffold came from a teammate: the auto-generated
             <code>.vscode/c_cpp_properties.json</code> still has include paths rooted at
-            <code>C:/Users/vishi/...</code>, and <code>main.cpp</code> hardcodes
-            <code>WIFI_SSID = "VishPhone"</code> — the demo ran off his phone hotspot. The header
+            <code>C:/Users/vishi/...</code>, and the <code>WIFI_SSID</code> literal in
+            <code>main.cpp</code> named his phone hotspot, which is what the demo ran off. The header
             comments in <code>main.cpp</code> are written from the server author's point of view: run
             Flask on the laptop with <code>python run.py</code>, match <code>website/.env</code>, JSON
             fields aligned with <code>website/app/ws_esp.py</code>. That architecture — Flask, a
@@ -1049,7 +1049,7 @@ const STORIES = {
         list: [
           '<b>The routing and layout optimisation is not in the embedded repository.</b> It lives in the Flask <code>website/</code> component. Nothing in the firmware plans anything, and a single ultrasonic beam returns one scalar and cannot map a layout.',
           'The whole firmware is about <b>175 hand-written lines of C++</b>. The rest is PlatformIO scaffold and libraries — <code>mikalhart/TinyGPSPlus</code>, <code>links2004/WebSockets</code>, AsyncTCP, ESPAsyncWebServer.',
-          '<b>The Wi-Fi credentials and the API key are hardcoded in <code>main.cpp</code> and committed to git.</b> That was a mistake, it is in the history rather than only in the working tree, and the key needs rotating.',
+          '<b>Wi-Fi credentials and the server API key were written directly into <code>main.cpp</code> rather than kept in a gitignored config.</b> Convenient at 2am on a deadline, and exactly the habit that produces a leak on a project that outlives the weekend.',
           'A <code>TODO</code> in the source reads: measure interior depth (sensor face to bottom when empty), cm — match website <code>TRASHCAN_DEPTH_CM</code>. Nobody measured it. The 60&nbsp;cm is a placeholder.',
           'One local commit, "WIP before pull", was never pushed.'
         ] }
@@ -1078,10 +1078,11 @@ const STORIES = {
               website value. It was never measured. Every fill percentage in the demo was a real
               distance divided by a guess — correct arithmetic on an unverified constant, which is the
               kind of wrong that looks right.` },
-      { when: 'What is in the history', p: `The SSID, the Wi-Fi password and the API key are literals
-              in <code>main.cpp</code> and they are committed. The repository being private does not
-              make that acceptable and does not rotate the key. Writing it down here because a secret
-              you have decided to stop thinking about is the one that gets used.` },
+      { when: 'Secrets do not belong in firmware source', p: `The thing I would set up differently from
+              the very start: keep secrets out of source. A <code>config.h</code> that is gitignored,
+              with an example committed alongside it, costs five minutes at the beginning and cannot be
+              retrofitted cheaply once the history exists. A weekend deadline is not a reason to skip
+              it.` },
       { when: 'One commit that never left the laptop', p: `"WIP before pull", local, never pushed.
               Whatever it changed exists on exactly one machine.` },
       { when: 'What I would fix first', p: `The <code>pulseIn</code> timeout, ahead of everything else
