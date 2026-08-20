@@ -973,6 +973,124 @@ const STORIES = {
   },
 
   /* ---------------------------------------------------------------
+     Written from the team's embedded repository, which is private.
+     --------------------------------------------------------------- */
+  'ultrasonic-smart-bin': {
+    status: 'ready',
+    lede: `A bin that reports how full it is and where it is. An HC-SR04 ultrasonic ranger measures the
+           distance down from the lid, a GPS module fixes the position, and an ESP32 pushes both to a
+           Flask server over a WebSocket once a second. Built at the LDL Designathon on 28 March 2026
+           with a team; second place, $1,000. About 175 hand-written lines of C++, and the decisions
+           worth recording are all about what the device refuses to work out for itself.`,
+    sections: [
+      { h: 'What the device actually is',
+        p: `An ESP32 — <code>nodemcu-32s</code>, Arduino framework under PlatformIO. The HC-SR04 sits in
+            the lid with trigger on GPIO14 and echo on GPIO27: a ten-microsecond trigger pulse, then
+            <code>pulseIn(echoPin, HIGH, 30000)</code> — a 30&nbsp;ms timeout — and distance is
+            <code>duration * 0.034 / 2</code>. A generic NMEA GPS module hangs off UART1, RX&nbsp;16 and
+            TX&nbsp;17 at 9600&nbsp;baud, parsed with TinyGPS++. Every 1000&nbsp;ms
+            (<code>SENSOR_INTERVAL_MS</code>) it sends a single JSON text frame:`,
+        list: [
+          '<code>type: "reading"</code> and <code>bin_id</code> — an integer the web UI hands out through a create-a-bin flow',
+          '<code>distance_cm</code> — the raw measurement, and the only thing the sensor actually knows',
+          '<code>latitude</code>, <code>longitude</code>, <code>gps_valid</code> and <code>satellites</code> — and only when there is a fix'
+        ] },
+      { h: 'The fill percentage is computed and then not sent',
+        p: `The firmware does work it out. <code>fillPct</code> is
+            <code>constrain((1.0 - distanceCm / TRASHCAN_DEPTH_CM) * 100.0, 0.0, 100.0)</code> against a
+            hard-coded <code>#define TRASHCAN_DEPTH_CM 60.0f</code>, and it goes to the serial monitor
+            so you can watch a bin fill from a laptop. It is not in the payload. The device sends
+            <code>distance_cm</code> and the server converts, against its own copy of the depth in
+            <code>website/.env</code>. Depth is a property of the bin, not of the sensor, and a bin gets
+            swapped for a deeper one long before the ESP32 inside it gets touched again — so
+            recalibrating is an edit to a config file rather than a reflash of hardware that is
+            physically in a bin lid.`,
+        quote: `A device should report what it measured. Interpretation belongs where it can be changed
+                without a screwdriver.` },
+      { h: 'The bin dials out; nothing dials in',
+        p: `The ESP32 is a WebSocket <em>client</em>, not a server. It opens
+            <code>ws://&lt;LAPTOP_IP&gt;:5000/api/v1/esp?api_key=&lt;KEY&gt;</code> against a Flask app
+            started with <code>python run.py</code> on <code>0.0.0.0:5000</code>, with the ingest route
+            in <code>website/app/ws_esp.py</code>. That direction is the reason it worked at all on a
+            hackathon network: a bin needs no inbound route, no port forward and no address of its own
+            that anyone has to know. The API key in the query string is the entire authentication
+            story, which is honest for a demo and would not survive a real deployment.` },
+      { h: 'The timeout that reports an empty bin',
+        p: `If <code>pulseIn</code> returns 0 — no echo inside the 30&nbsp;ms window — the code sets
+            <code>distanceCm = TRASHCAN_DEPTH_CM</code>. Distance equal to depth is zero percent full,
+            so a sensor that has come loose, or is aimed at something that swallows the ping, reports
+            exactly what a bin somebody has just emptied reports. <b>A failed sensor and an empty bin
+            become indistinguishable</b>, and for a collection route that is the wrong default in the
+            expensive direction: the truck is routed away from the bin that may be overflowing. The
+            payload already carries <code>gps_valid</code>, so the shape of the fix was sitting right
+            there — distance and validity are two separate facts and the frame only sends one of
+            them.`,
+        quote: `Reporting empty because you could not see is worse than reporting nothing at all.` },
+      { h: 'Two dollars, one number',
+        p: `An ultrasonic ranger costs about two dollars and returns one scalar. Everything downstream
+            had to be useful with one number per bin, and that constraint is why the system has the
+            shape it does — the server owns the interpretation because interpretation is the only place
+            value can be added, and routing is computed from fill level and GPS position because those
+            are the only two things a bin knows about itself. A single beam cannot map a layout. It can
+            tell you how far away the nearest thing in front of it is, and nothing else.` },
+      { h: 'Who wrote which half',
+        p: `The PlatformIO scaffold came from a teammate: the auto-generated
+            <code>.vscode/c_cpp_properties.json</code> still has include paths rooted at
+            <code>C:/Users/vishi/...</code>, and <code>main.cpp</code> hardcodes
+            <code>WIFI_SSID = "VishPhone"</code> — the demo ran off his phone hotspot. The header
+            comments in <code>main.cpp</code> are written from the server author's point of view: run
+            Flask on the laptop with <code>python run.py</code>, match <code>website/.env</code>, JSON
+            fields aligned with <code>website/app/ws_esp.py</code>. That architecture — Flask, a
+            <code>run.py</code>, a WebSocket ingest route, an API key — is the same shape I used at the
+            Momentum Buildathon two weeks later. The reasonable read is that the hardware scaffold was
+            his, and the Flask server and the firmware's networking layer were mine. That is a
+            reasonable read rather than an established fact, and it was a team project either way.` },
+      { h: 'Still open',
+        list: [
+          '<b>The routing and layout optimisation is not in the embedded repository.</b> It lives in the Flask <code>website/</code> component. Nothing in the firmware plans anything, and a single ultrasonic beam returns one scalar and cannot map a layout.',
+          'The whole firmware is about <b>175 hand-written lines of C++</b>. The rest is PlatformIO scaffold and libraries — <code>mikalhart/TinyGPSPlus</code>, <code>links2004/WebSockets</code>, AsyncTCP, ESPAsyncWebServer.',
+          '<b>The Wi-Fi credentials and the API key are hardcoded in <code>main.cpp</code> and committed to git.</b> That was a mistake, it is in the history rather than only in the working tree, and the key needs rotating.',
+          'A <code>TODO</code> in the source reads: measure interior depth (sensor face to bottom when empty), cm — match website <code>TRASHCAN_DEPTH_CM</code>. Nobody measured it. The 60&nbsp;cm is a placeholder.',
+          'One local commit, "WIP before pull", was never pushed.'
+        ] }
+    ],
+    decisions: [
+      { d: 'Send the raw distance and let the server convert it',
+        why: `It costs nothing on the wire and it moves the one calibration constant in the system out
+              of flash and into a config file. Recalibrating a bin becomes an edit to
+              <code>website/.env</code> instead of a reflash of a board sealed into a bin lid.` },
+      { d: 'Make the device the client',
+        why: `Dialling out to a known address needs no inbound route, no port forward and no fixed
+              address at the bin, which is what let it run off a phone hotspot. The cost is that
+              authentication is one API key in a query string, and that is all it is.` },
+      { d: 'Report empty on a sensor timeout — the one I would change first',
+        why: `It was the shortest path to a demo that never displayed a garbage number, and it is the
+              wrong call. Collapsing "no reading" into "0% full" makes a dead sensor invisible to the
+              exact system that exists to notice bins. A <code>distance_valid</code> flag alongside
+              <code>gps_valid</code> is a few lines, and the payload already proves I was willing to
+              send one.` }
+    ],
+    journal: [
+      { when: '28 March 2026', p: `The LDL Designathon. An ESP32, an HC-SR04, a GPS module, a laptop
+              running Flask off a teammate's phone hotspot, and a bin. Second place, $1,000.` },
+      { when: 'The number nobody measured', p: `<code>TRASHCAN_DEPTH_CM</code> is 60.0 with a TODO next
+              to it asking for the interior depth, sensor face to bottom when empty, matched to the
+              website value. It was never measured. Every fill percentage in the demo was a real
+              distance divided by a guess — correct arithmetic on an unverified constant, which is the
+              kind of wrong that looks right.` },
+      { when: 'What is in the history', p: `The SSID, the Wi-Fi password and the API key are literals
+              in <code>main.cpp</code> and they are committed. The repository being private does not
+              make that acceptable and does not rotate the key. Writing it down here because a secret
+              you have decided to stop thinking about is the one that gets used.` },
+      { when: 'One commit that never left the laptop', p: `"WIP before pull", local, never pushed.
+              Whatever it changed exists on exactly one machine.` },
+      { when: 'What I would fix first', p: `The <code>pulseIn</code> timeout, ahead of everything else
+              on the open list. The rest are cleanup tasks with known answers; that one is a system
+              that lies quietly, and it lies in the direction of a truck driving past a full bin.` }
+    ]
+  },
+
+  /* ---------------------------------------------------------------
      Everything below is scaffolding — the page renders the project
      overview and an honest "in progress" note until it is written.
      These have no development journal to write from yet.
@@ -980,7 +1098,6 @@ const STORIES = {
   'cdh-flight-software':                        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },
-  'ultrasonic-smart-bin':                       { status: 'draft' },
   'ai-cross-document-verification':             { status: 'draft' },
   'design-review-and-benchmarking':             { status: 'draft' }
 };
