@@ -33,6 +33,9 @@ const SKILLS = [
     { n:'F′ (F Prime)',        m:['F Prime','F′'] },
     { n:'STM32 · Cortex-M0+',  m:['STM32','STM32C011'] },
     { n:'RP2040',              m:['RP2040'] },
+    { n:'ESP32 · ESP-IDF',     m:['ESP32','ESP-IDF'] },
+    { n:'FreeRTOS',            m:['FreeRTOS'] },
+    { n:'CRC framing',         m:['CRC16-CCITT','CRC'] },
     { n:'CAN bus',             m:['CAN'] },
     { n:'SPI-CAN',             m:['SPI-CAN','MCP2515'] },
     { n:'Auto-enumeration',    m:['auto-enumeration','enumerat'] },
@@ -41,6 +44,8 @@ const SKILLS = [
   ]},
   { t:'Sensing & instrumentation', g:'wave', hue:'sn', items:[
     { n:'Magnetic encoders',    m:['MT6701','encoder','encoders'] },
+    { n:'MCP3008 ADC',          m:['MCP3008'] },
+    { n:'Servo buses',          m:['Feetech','STS3215'] },
     { n:'Hall-effect',          m:['Hall-effect'] },
     { n:'6-axis IMU',           m:['IMU'] },
     { n:'Chipless RFID',        m:['RFID'] },
@@ -168,10 +173,22 @@ const PROJECTS = [
            ['Inhabit_UI','https://github.com/YoussefAnbar/Inhabit_UI','private']] },
 
   { g:'hardware', cover:'board', slug:'tinycore-industries-micro-drone-hat', title:'tinyCore Industries — Micro-drone HAT', when:'2025 – 2026',
-    stack:'Altium · MOSFET low-side switching · 1S LiPo / LiHV · 3.3 V LDO · DRC · CAM · SolidWorks',
-    d:'A custom micro-drone HAT PCB driving four brushed coreless motors, with 1S LiPo/LiHV power delivery and an onboard LDO feeding the MCU. I replaced the motor connectors with through-hole solder pads for vibration resistance and validated manufacturability through 3D PCB export and SolidWorks fit checks. <em>Team of eight, pre-seed $700K, and the platform sold to universities</em> — a very different bar from a board that only has to work on my desk.',
+    stack:'Altium · ESP32-S3-MINI-1 · LSM6DS3TR IMU · MCP73831 charger · AP2112K LDO · USB-C · micro-SD · Qwiic · MOSFET low-side switching · 1S LiPo / LiHV · DRC · CAM · SolidWorks',
+    d:'A USB-C-powered, battery-charging, SD-logging ESP32-S3 board with a six-axis IMU and a Qwiic port, driving four brushed coreless motors through MOSFET low-side switching. 22-part BOM I selected end to end — MCP73831 single-cell charging, AP2112K 3.3 V rail, through-hole motor pads for vibration resistance, SolidWorks fit checks. <em>Team of eight, pre-seed $700K, platform sold to universities.</em> The journal on its page names what was inherited and what was mine.',
     stats:[['team','8'],['funding','pre-seed $700K'],['outcome','sold to universities']],
     links:[['tinyCore','https://github.com/YoussefAnbar/tinyCore','private']] },
+
+  { g:'hardware', cover:'trace', shot:'v1-leader-arm', slug:'inhabit-teleop-v1', title:'Inhabit V1 — Potentiometer Teleop Arm', when:'2026 · team project',
+    stack:'ESP32-S3 · 3× MCP3008 SPI ADC · 24 potentiometers · CRC16-CCITT · USB CDC · KiCad · Unitree G1',
+    d:'The first Inhabit arm — a 3D-printed leader arm fitted with 24 potentiometers, digitised through three MCP3008s and streamed at 100 Hz over a CRC-framed USB link to a Unitree G1. <b>A team project, and most of the code is not mine</b> — I keep the mirror because the problems found here are the reason V2 exists: pots wear, one host polling every joint is a bottleneck, and silent failure is the worst failure. Roughly $25 in electronics before printing.',
+    stats:[['channels','24'],['parts cost','~$25'],['rate','100 Hz'],['taught','everything V2 fixes']],
+    links:[['inhabit-teleop-v1','https://github.com/YoussefAnbar/inhabit-teleop-v1','private'],['upstream: matthehzhang','https://github.com/matthehzhang/inhabit_teleop','private']] },
+
+  { g:'hardware', cover:'flow', shot:'v1-detail', slug:'pi-teleop', title:'pi-teleop — Leader-to-Follower Rig', when:'2026',
+    stack:'Raspberry Pi · ESP32 · MCP3008 · ESP-IDF · FreeRTOS · CRC16-CCITT · Feetech STS3215 · SO-101',
+    d:'The bridge between V1 and V2. An ESP32 digitises the leader arm and streams 102-byte CRC-framed packets at 100 Hz; a Raspberry Pi validates in three layers — CRC, finiteness, sequence staleness — then maps six channels onto an SO-101 follower over a 1 Mbaud Feetech serial bus. Torque arms only after the first homed mapping and drops in a <code>finally</code>, so the arm powers up compliant and goes limp on exit. Layered so swapping serial for CAN touches one module — <em>which is exactly what V2 did.</em>',
+    stats:[['packet','102 B · CRC16-CCITT'],['loop','100 Hz absolute-deadline'],['validation','3 layers, 6 counters'],['torque','armed after homing']],
+    links:[['pi-teleop','https://github.com/YoussefAnbar/pi-teleop','private']] },
 
   { g:'hardware', cover:'wave', slug:'baja-telemetry-ecu', title:'Baja Telemetry ECU', when:'2025 – present',
     stack:'RP2040 · C/C++ · Hall-effect · 6-axis IMU · microSD',

@@ -1096,6 +1096,144 @@ const STORIES = {
      overview and an honest "in progress" note until it is written.
      These have no development journal to write from yet.
      --------------------------------------------------------------- */
+  'inhabit-teleop-v1': {
+    status: 'ready',
+    lede: `The first Inhabit arm, and the honest starting point of everything that followed. A
+           3D-printed leader arm fitted with 24 potentiometers, three MCP3008 ADCs, and an ESP32-S3,
+           teleoperating a Unitree G1 humanoid for roughly $25 in electronics. A team project — the
+           original repository is Matthew Zhang's, with contributions from Luke Lu, and most of the
+           code is not mine. I keep the mirror because the failures found here are the design brief
+           for V2.`,
+    sections: [
+      { h: 'The signal chain',
+        list: [
+          '24 potentiometers on the printed arm',
+          '3× MCP3008 — 10-bit SPI ADC at 100 kHz',
+          'ESP32-S3 running ESP-IDF and FreeRTOS: EMA smoothing, deadzone, clamp',
+          '102-byte framed packet with CRC16-CCITT, USB CDC at 100 Hz',
+          'Python bridge: per-joint scale, offset, limits, jump rejection, velocity clamp',
+          'DDS LowCmd on rt/lowcmd at 1 kHz, into the G1 or MuJoCo'
+        ] },
+      { h: 'What is honestly absent',
+        p: `The link is one-way by construction — the firmware sets its receive callback to
+            <code>NULL</code>, so the board cannot hear the host at all, and the schematic has no
+            motor driver and no actuator, so it cannot push back on an operator. The one thing that
+            reads like force feedback is a position-error clamp running the other way: it caps how
+            hard the <em>robot</em> pushes, not what the operator feels. And the team's own debugging
+            log, dated 14 March 2026, ends with: "no conclusive proof yet that the MCP3008 analog
+            inputs are being read correctly."`,
+        quote: `The gap between the code and the ambition is part of the record. Better to state it
+                than have someone find it.` },
+      { h: 'What V1 taught, and what V2 does instead',
+        p: `<b>Potentiometers wear and do not scale</b> — a wiper is a mechanical contact, and 24
+            channels converging on one microcontroller is a wiring problem that gets worse with every
+            joint. V2 uses MT6701 magnetic encoders, contactless and readable through the housing.
+            <b>One host polling every joint is a bottleneck</b> — V2 puts an MCU in each joint on a
+            CAN bus, so joints report rather than being interrogated. <b>Silent failure is the worst
+            failure</b> — that unresolved ADC log is the entire case for V2's six named fault bits.
+            <b>Identity has to be separate from ordering</b> — V1 hard-codes channel-to-joint
+            bindings; V2 auto-enumerates so a failed joint can be swapped without renumbering the
+            arm.` }
+    ],
+    diagrams: [
+      { src:'assets/img/work/v1-leader-arm.jpg',
+        alt:'The V1 leader arm with articulated fingers on a desk stand',
+        cap:'The V1 leader arm. Each finger and joint carries a potentiometer; the operator wears the arm and the G1 follows. Printed structure, ~$25 of electronics.' },
+      { src:'assets/img/work/v1-detail.jpg',
+        alt:'Detail render of the V1 arm mechanism',
+        cap:'Joint detail. Every degree of freedom is a wiper on a resistive track — cheap, readable, and guaranteed to wear out. The argument for magnetic sensing writes itself.' }
+    ],
+    decisions: [
+      { d: 'Keep a mirror of a repository that is mostly not mine',
+        why: `V1 is where the Inhabit work started and the problems found in it are why V2 looks the
+              way it does. The mirror exists for context, with attribution stated in the README
+              rather than discovered in the history. Provenance notes in the repo record which files
+              came from an AI-assisted session under the original author's account.` },
+      { d: 'Target $25 of electronics',
+        why: `A leader arm you can afford to build eight of is a different research tool from one you
+              protect. The cost ceiling forced the MCP3008-plus-potentiometer architecture — and
+              finding that architecture's limits is what justified spending more on V2.` }
+    ]
+  },
+
+  'pi-teleop': {
+    status: 'ready',
+    lede: `The bridge between V1 and V2. An operator moves the potentiometer leader arm; an ESP32
+           digitises 24 channels through three MCP3008s and streams them to a Raspberry Pi at 100 Hz;
+           the Pi maps six of them onto an SO-101 follower over a 1 Mbaud Feetech serial bus. No
+           PyTorch, no DDS, no GUI — pure Python and pyserial, structured so the transport can be
+           swapped without touching the mapping. Which is exactly what V2 then did.`,
+    sections: [
+      { h: 'The wire format, and three checks in order',
+        p: `102 bytes at 100 Hz: a two-byte header, a 16-bit sequence number, 24 little-endian floats,
+            and a CRC16-CCITT computed bit-by-bit to mirror the C implementation exactly, so the two
+            ends cannot disagree. A packet has to survive three checks, each catching a different
+            failure:`,
+        list: [
+          '<b>CRC</b> — corruption on the wire',
+          '<b>Finiteness</b> — a NaN that reaches the mapper poisons the moving average permanently, because every later output is an average involving a NaN',
+          '<b>Sequence staleness</b> — a repeated or regressed sequence number means a duplicate or reordered frame, and commanding a servo from a stale position is worse than commanding nothing'
+        ] },
+      { h: 'Failures are counted, not swallowed',
+        p: `Six counters — <code>valid</code>, <code>crc_fail</code>, <code>invalid</code>,
+            <code>stale</code>, <code>desync_bytes</code>, <code>disconnects</code> — printed
+            periodically by the control loop. A bad run tells you which layer failed instead of just
+            failing. Header resync scans for the magic bytes and advances one byte past a bad header;
+            on a serial exception the reader reconnects every two seconds.` },
+      { h: 'Torque sequencing — the part I would defend hardest',
+        p: `Torque is not enabled in the constructor. The mapper homes on the first packet — the
+            operator's pose becomes the zero reference, no calibration dance — which means the first
+            mapping returns nothing. If torque were already on, the servos would be holding whatever
+            position they powered up at while the operator stood somewhere else. So torque arms only
+            after the first homed targets are computed, and drops in a <code>finally</code> wrapped so
+            shutdown cannot fail.`,
+        quote: `The arm powers up compliant, and goes limp on exit rather than fighting whoever picks
+                it up. Both are one line, and both are the difference between a demo and an injury.` },
+      { h: 'The control loop',
+        p: `100 Hz on an absolute deadline, not <code>sleep(dt)</code> — sleeping a fixed interval
+            accumulates drift by however long each tick's work took. Overruns reset the deadline
+            rather than catching up, because catching up on a teleop loop means commanding a burst of
+            stale positions. The reader drains its buffer and keeps only the newest packet: an
+            operator's arm position from 200 ms ago is not information, it is a hazard.` },
+      { h: 'Fail-closed, in the firmware',
+        p: `Repeated four times in the C reference firmware: if any SPI read fails, return false and
+            leave the output array unchanged, so a transient bus fault never injects a false sample
+            into the smoothing filter. A filter with memory turns one bad sample into a decaying error
+            across the next several — refusing to write is cheaper than filtering the consequence.
+            The WROOM build also silences all logging on UART0, with the reason recorded: any text on
+            that UART would corrupt the packet stream the Pi is parsing.` },
+      { h: 'What is not finished, named in the journal',
+        p: `<code>POT_SCALE = 1.0</code> on every joint — the correct value (≈1.75 for a 300° pot) is
+            computed in a comment directly above it and never applied; bring-up stopped before
+            commissioning. The servo bus is write-only, so nothing notices a servo that did not
+            arrive or one cooking itself. The six joints are written individually rather than in one
+            SYNC_WRITE. And there is a real parser bug, found by reading: on a stale or non-finite
+            packet the buffer is consumed and the caller then deletes one more byte — it self-heals
+            through the header scan, but it eats the first byte of the next frame. Written down,
+            not fixed.` }
+    ],
+    decisions: [
+      { d: 'Four layers with hard edges',
+        why: `encoders/ knows about bytes on a wire, mapping/ knows about angles, robot_interfaces/
+              knows about Feetech registers, configs/ holds the numbers. The mapper emits radians per
+              servo id and has never heard of a Feetech packet. That seam is the reason this project
+              matters more than the arm it drives — swapping serial for CAN touches one module.` },
+      { d: 'Hold the last good value on a spike, never clamp it',
+        why: `A potentiometer wiper that loses contact for one sample reads garbage. Clamping garbage
+              to a joint limit still moves the joint to the limit; holding the previous value moves it
+              nowhere. The jump rejector does the second.` }
+    ],
+    journal: [
+      { when: 'Provenance', p: `This project had no git history until 19 August 2026 — it was written
+              as a working directory and pushed afterwards, so the journal is reconstructed from the
+              source rather than from commits. Recorded honestly in the repo.` },
+      { when: 'What I learned', p: `Validate in layers and count what you reject. Sequence the power.
+              Use absolute deadlines, drop stale frames. And write down the number you did not use —
+              the 1.75 scale sitting unapplied in a comment is the most useful line in the config,
+              because it says exactly what is left to do.` }
+    ]
+  },
+
   'cdh-flight-software':                        { status: 'draft' },
   'baja-telemetry-ecu':                         { status: 'draft' },
   'chipless-rfid-strain-sensing':               { status: 'draft' },
