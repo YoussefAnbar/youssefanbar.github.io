@@ -21,7 +21,7 @@
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[k] + '</svg>';
 
   const ITEMS = [
-    { k:'down', label:'Download résumé', sub:'PDF · 313 KB', href:RESUME, download:'Youssef-Anbar-Resume.pdf' },
+    { k:'down', label:'Download résumé', sub:'PDF · 314 KB', href:RESUME, download:'Youssef-Anbar-Resume.pdf' },
     { k:'open', label:'Open résumé',     sub:'in a new tab',  href:RESUME, blank:true },
     { k:'hub',  label:'GitHub',          sub:'YoussefAnbar',  href:'https://github.com/YoussefAnbar', blank:true },
     { k:'li',   label:'LinkedIn',        sub:'youssef-anbar',  href:'https://www.linkedin.com/in/youssef-anbar-74964a211/', blank:true },

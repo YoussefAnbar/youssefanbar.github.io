@@ -78,7 +78,7 @@ const EXPERIENCE = [
       'Automated competitive benchmarking through a Velocity Suite data collector and a datacenter market-intelligence scraper, replacing manual tracking with live fuel-cost and operational data on GE turbines versus competitors.',
       'Authored a research paper on clutched versus clutchless synchronous condensers for grid stability applications.'
     ] },
-  { role:'Command &amp; Data Handling — Flight Software', org:'Texas Spacecraft Laboratory · NASA partner',
+  { role:'Command &amp; Data Handling — Flight Software', org:'Texas Spacecraft Laboratory · NASA partner · SCOPE mission',
     where:'UT Austin', when:'2026 – present', accent:'fw',
     bullets:[
       'Developing CDH flight software in <b>C++</b> on NASA JPL’s <b>F′ (F Prime)</b> framework — authoring Components, Ports, and Commands for telemetry and command dispatch.',
@@ -161,7 +161,7 @@ const GROUPS = [
 const PROJECTS = [
   { g:'flight', cover:'sat', slug:'cdh-flight-software', title:'CDH Flight Software', when:'2026 – present',
     stack:'C++ · NASA JPL F′ (F Prime) · FPP · Linux/ARM',
-    d:'Command and Data Handling for the Texas Spacecraft Laboratory, a NASA partner lab. I author Components, Ports, and Commands for telemetry and command dispatch, and implement rate-group scheduled tasks with FPP model definitions for autocoded interfaces, validated on Linux/ARM target hardware. <em>Flight software has the same property as a sensor cast into metal: you do not get to go back and fix it.</em>',
+    d:'Command and Data Handling for the SCOPE mission at the Texas Spacecraft Laboratory, a NASA partner lab. I author Components, Ports and Commands for telemetry and command dispatch, and implement rate-group scheduled tasks with FPP model definitions for autocoded interfaces, validated on Linux/ARM target hardware. The framework is NASA JPL’s F′, which is used on real missions and imposes its structure on you rather than the other way round.',
     stats:[['framework','NASA JPL F′'],['language','C++'],['target','Linux / ARM']],
     links:[['Texas Spacecraft Laboratory','']] },
 
@@ -198,7 +198,7 @@ const PROJECTS = [
 
   { g:'hardware', cover:'coil', slug:'chipless-rfid-strain-sensing', title:'Chipless RFID Strain Sensing', when:'2025 – present',
     stack:'RF · resonant RLC · LPBF · micro-cold spray',
-    d:'Wireless strain and temperature sensors sealed inside 3D-printed metal, where there is no revision two. Targeting ~1×10⁻⁵ strain and under 1&nbsp;°C. The most unforgiving version of the thing all my other work rehearses — design as though you will never get to touch it again.',
+    d:'Wireless strain and temperature sensors embedded inside laser-powder-bed-fusion metal parts, read without a battery or a wire. Resonant RLC architectures targeting ~1×10⁻⁵ strain and under 1&nbsp;°C, with micro-cold-spray fabrication. Once the part is printed the sensor is inside it — no power, no service access, no second revision.',
     stats:[['strain','~1×10⁻⁵'],['temperature','< 1 °C'],['scale','DARPA-scale']],
     links:[['UT Austin · PhD lab','']] },
 

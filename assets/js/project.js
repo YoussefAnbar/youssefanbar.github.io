@@ -72,6 +72,12 @@
       '<div class="proj-links">' + project.links.map(linkHTML).join('') + '</div>' +
     '</header>';
 
+  /* A story written from the work rather than from a public repository says so,
+     rather than letting the reader assume a commit history sits behind it. */
+  if (story.note) {
+    html += '<p class="proj-note">' + story.note + '</p>';
+  }
+
   /* ---------- body ---------- */
   if (story.status === 'ready') {
     if (story.sections) html += story.sections.map(section).join('');
