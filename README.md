@@ -111,6 +111,5 @@ The three hackathon projects have no repositories at all. They were designed, bu
 ## Outstanding
 
 - Eight of the fifteen `STORIES` entries are written and marked `ready`. The remaining seven are `draft` and render a placeholder: `cdh-flight-software`, `tinycore-industries-micro-drone-hat`, `baja-telemetry-ecu`, `chipless-rfid-strain-sensing`, `ultrasonic-smart-bin`, `ai-cross-document-verification`, `design-review-and-benchmarking`.
-- The LinkedIn href in `index.html` is marked `TODO` and has not been verified as claimed.
 - The phone number in the contact section is public and will be scraped. Remove it if that matters.
 - Nine of the linked repositories are private, so per-project READMEs will not be publicly readable until those repos are opened.

@@ -14,7 +14,8 @@
     down: '<path d="M12 3v12M7 11l5 5 5-5M4 20h16"/>',
     open: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
     hub:  '<path d="M12 2.6a9.4 9.4 0 0 0-3 18.3c.47.09.64-.2.64-.45v-1.6c-2.61.57-3.16-1.26-3.16-1.26-.43-1.08-1.04-1.37-1.04-1.37-.85-.58.06-.57.06-.57.94.07 1.44.97 1.44.97.84 1.44 2.2 1.02 2.74.78.09-.61.33-1.02.6-1.26-2.09-.24-4.28-1.04-4.28-4.64 0-1.02.36-1.86.96-2.51-.1-.24-.42-1.2.09-2.49 0 0 .79-.25 2.58.96a9 9 0 0 1 4.7 0c1.79-1.21 2.58-.96 2.58-.96.51 1.29.19 2.25.09 2.49.6.65.96 1.49.96 2.51 0 3.61-2.2 4.4-4.29 4.63.34.29.64.87.64 1.75v2.58c0 .25.17.55.65.45A9.4 9.4 0 0 0 12 2.6Z"/>',
-    mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.6 6.5 12 13l8.4-6.5"/>'
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.6 6.5 12 13l8.4-6.5"/>',
+    li:   '<path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05a4.2 4.2 0 0 1 3.75-2.05c4 0 4.75 2.6 4.75 6V21h-4v-5.5c0-1.3 0-3-1.85-3s-2.15 1.45-2.15 2.9V21h-4V9Z" fill="currentColor" stroke="none"/>'
   };
   const ico = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[k] + '</svg>';
@@ -23,6 +24,7 @@
     { k:'down', label:'Download résumé', sub:'PDF · 308 KB', href:RESUME, download:'Youssef-Anbar-Resume.pdf' },
     { k:'open', label:'Open résumé',     sub:'in a new tab',  href:RESUME, blank:true },
     { k:'hub',  label:'GitHub',          sub:'YoussefAnbar',  href:'https://github.com/YoussefAnbar', blank:true },
+    { k:'li',   label:'LinkedIn',        sub:'youssef-anbar',  href:'https://www.linkedin.com/in/youssef-anbar-74964a211/', blank:true },
     { k:'mail', label:'Email me',        sub:'yha249@my.utexas.edu', href:'mailto:yha249@my.utexas.edu' }
   ];
 
