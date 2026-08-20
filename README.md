@@ -82,14 +82,14 @@ These are token-against-token figures. They do not account for the alpha-composi
 
 GitHub Pages caches assets for roughly ten minutes. The `?v=` query on every asset reference is a cache buster — **bump it every time you edit the CSS or JS**, or the change will not reach anyone holding a cached copy.
 
-It is currently `v=11`. Both `index.html` and `project.html` carry five references each:
+It is currently `v=20`. Both `index.html` and `project.html` carry five references each — the same stylesheet and the same three shared scripts, except that `project.html` loads `project.js` where `index.html` loads `app.js`:
 
 ```html
-<link rel="stylesheet" href="assets/css/style.css?v=11">
-<script src="assets/js/data.js?v=11"></script>
-<script src="assets/js/stories.js?v=11"></script>
-<script src="assets/js/app.js?v=11"></script>
-<script src="assets/js/menu.js?v=11"></script>
+<link rel="stylesheet" href="assets/css/style.css?v=20">
+<script src="assets/js/data.js?v=20"></script>
+<script src="assets/js/stories.js?v=20"></script>
+<script src="assets/js/app.js?v=20"></script>
+<script src="assets/js/menu.js?v=20"></script>
 ```
 
 All of them must always carry the same number, on both pages — and it must only ever go **up**. Two separate edits both landing on `?v=6` once left browsers serving the older of the two files, because the URL never changed. A collision is worse than no cache buster at all, since it looks like it worked.
@@ -110,7 +110,7 @@ The three hackathon projects have no repositories at all. They were designed, bu
 
 ## Outstanding
 
-- One `STORIES` entry (`datacenter-thermal-twin`) is written. The remaining fourteen are `draft` and render a placeholder.
+- Eight of the fifteen `STORIES` entries are written and marked `ready`. The remaining seven are `draft` and render a placeholder: `cdh-flight-software`, `tinycore-industries-micro-drone-hat`, `baja-telemetry-ecu`, `chipless-rfid-strain-sensing`, `ultrasonic-smart-bin`, `ai-cross-document-verification`, `design-review-and-benchmarking`.
 - The LinkedIn href in `index.html` is marked `TODO` and has not been verified as claimed.
 - The phone number in the contact section is public and will be scraped. Remove it if that matters.
 - Nine of the linked repositories are private, so per-project READMEs will not be publicly readable until those repos are opened.
